@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Minance
 
-## Getting Started
+Minance é um SaaS de gestão financeira pessoal construído com:
 
-First, run the development server:
+- Next.js 16 + React 19
+- App Router + Server Actions
+- Supabase Auth
+- Supabase PostgreSQL
+- Deploy pronto para Vercel
+
+## O que já está pronto
+
+- Autenticação com Supabase (`/auth`)
+- Proteção de sessão com middleware SSR
+- Dashboard financeiro (`/dashboard`)
+- Cadastro e remoção de lançamentos
+- Cadastro e remoção de categorias
+- Schema SQL inicial com RLS em `supabase/schema.sql`
+
+## Configuração local
+
+1. Instale as dependências:
+
+```bash
+npm install
+```
+
+2. Configure as variáveis de ambiente:
+
+```bash
+cp .env.example .env.local
+```
+
+3. No Supabase SQL Editor, execute:
+
+```sql
+-- arquivo:
+supabase/schema.sql
+```
+
+4. Rode o projeto:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Acesse:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```txt
+http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Variáveis de ambiente
 
-## Learn More
+```env
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Estrutura principal
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```txt
+src/app/auth                -> login e cadastro
+src/app/(app)/dashboard     -> dashboard e lançamentos
+src/app/(app)/categorias    -> gestão de categorias
+src/lib/supabase            -> clients SSR/browser + middleware
+supabase/schema.sql         -> tabelas, índices e policies
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deploy
 
-## Deploy on Vercel
+### GitHub
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Criar repositório
+2. Fazer push da pasta do projeto
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Vercel
+
+1. Importar o repositório
+2. Adicionar as variáveis:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+3. Deploy
+
+## Próximos passos sugeridos
+
+- metas mensais por categoria
+- recorrência de despesas e receitas
+- filtros por período
+- gráficos de evolução
+- exportação CSV
