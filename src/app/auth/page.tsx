@@ -2,8 +2,13 @@
 import { redirect } from "next/navigation";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getUsuarioAutenticadoComPerfil } from "@/lib/users";
 
-import { signInAction, signUpAction } from "./actions";
+import {
+  readAndClearTemporaryPassword,
+  signInAction,
+  signUpAction,
+} from "./actions";
 
 type AuthPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
@@ -21,6 +26,7 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
   const params = searchParams ? await searchParams : {};
   const errorMessage = readParam(params, "error");
   const successMessage = readParam(params, "success");
+  const temporaryPassword = await readAndClearTemporaryPassword();
 
   const supabase = await createSupabaseServerClient();
   const {
@@ -28,7 +34,8 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
   } = await supabase.auth.getSession();
 
   if (session) {
-    redirect("/dashboard");
+    const usuario = await getUsuarioAutenticadoComPerfil(supabase, session.user);
+    redirect(usuario?.senha_provisoria_ativa ? "/primeiro-acesso" : "/dashboard");
   }
 
   return (
@@ -65,15 +72,34 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
         </section>
 
         <section className="grid content-center gap-6">
-          {(errorMessage || successMessage) && (
-            <div
-              className={`rounded-lg border px-4 py-3 text-sm ${
-                errorMessage
-                  ? "border-[var(--cor_despesa_secundaria)] bg-[var(--cor_despesa_primaria)]/25"
-                  : "border-[var(--cor_destaque_secundaria)] bg-[var(--cor_destaque_primaria)]/20"
-              }`}
-            >
-              {errorMessage ?? successMessage}
+          {(errorMessage || successMessage || temporaryPassword) && (
+            <div className="grid gap-3">
+              {(errorMessage || successMessage) && (
+                <div
+                  className={`rounded-lg border px-4 py-3 text-sm ${
+                    errorMessage
+                      ? "border-[var(--cor_despesa_secundaria)] bg-[var(--cor_despesa_primaria)]/25"
+                      : "border-[var(--cor_destaque_secundaria)] bg-[var(--cor_destaque_primaria)]/20"
+                  }`}
+                >
+                  {errorMessage ?? successMessage}
+                </div>
+              )}
+
+              {temporaryPassword && (
+                <div className="rounded-lg border border-[var(--cor_escura_primaria)]/10 bg-white/55 px-4 py-4">
+                  <p className="text-sm font-medium text-[var(--cor_escura_primaria)]">
+                    Senha provisoria gerada para teste
+                  </p>
+                  <p className="mt-2 rounded-md bg-[var(--cor_fundo_primaria)] px-3 py-2 font-mono text-sm">
+                    {temporaryPassword}
+                  </p>
+                  <p className="mt-2 text-xs leading-5 text-[var(--cor_escura_primaria)]/72">
+                    Este fluxo substitui temporariamente o envio por e-mail. Assim que integrarmos
+                    service role e um provedor de e-mail, essa senha pode deixar de ser exibida na tela.
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -103,7 +129,7 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
                     name="password"
                     type="password"
                     required
-                    minLength={6}
+                    minLength={8}
                     className="h-11 w-full rounded-md border border-[var(--cor_escura_primaria)]/15 bg-[var(--cor_fundo_primaria)] px-3 text-sm outline-none focus:border-[var(--cor_destaque_secundaria)]"
                   />
                 </label>
@@ -121,7 +147,7 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
               <div className="space-y-1">
                 <h2 className="text-xl font-semibold">Criar conta</h2>
                 <p className="text-sm text-[var(--cor_escura_primaria)]/80">
-                  Abra seu ambiente pessoal no Minance.
+                  O sistema cria uma senha provisoria e exige troca no primeiro acesso.
                 </p>
               </div>
 
@@ -145,24 +171,13 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
                     className="h-11 w-full rounded-md border border-[var(--cor_escura_primaria)]/15 bg-[var(--cor_fundo_primaria)] px-3 text-sm outline-none focus:border-[var(--cor_destaque_secundaria)]"
                   />
                 </label>
-
-                <label className="block space-y-2">
-                  <span className="text-sm">Senha</span>
-                  <input
-                    name="password"
-                    type="password"
-                    required
-                    minLength={6}
-                    className="h-11 w-full rounded-md border border-[var(--cor_escura_primaria)]/15 bg-[var(--cor_fundo_primaria)] px-3 text-sm outline-none focus:border-[var(--cor_destaque_secundaria)]"
-                  />
-                </label>
               </div>
 
               <button
                 type="submit"
                 className="mt-6 inline-flex h-11 w-full items-center justify-center rounded-md bg-[var(--cor_fundo_botao)] px-4 text-sm font-medium text-[var(--cor_texto_claro)]"
               >
-                Criar conta
+                Criar conta e gerar senha provisoria
               </button>
             </form>
           </div>
@@ -171,4 +186,3 @@ export default async function AuthPage({ searchParams }: AuthPageProps) {
     </main>
   );
 }
-

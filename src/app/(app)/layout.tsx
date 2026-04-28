@@ -16,6 +16,7 @@ import {
 
 import { signOutAction } from "@/app/auth/actions";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getUsuarioAutenticadoComPerfil } from "@/lib/users";
 
 const navigation = [
   { href: "/dashboard", label: "DASHBOARD", icon: LayoutDashboard },
@@ -52,10 +53,13 @@ export default async function AppLayout({
     redirect("/auth");
   }
 
-  const fullName =
-    session.user.user_metadata.full_name ??
-    session.user.email?.split("@")[0] ??
-    "Usuario";
+  const usuario = await getUsuarioAutenticadoComPerfil(supabase, session.user);
+
+  if (usuario?.senha_provisoria_ativa) {
+    redirect("/primeiro-acesso");
+  }
+
+  const fullName = usuario?.nome_completo ?? session.user.email?.split("@")[0] ?? "Usuario";
 
   return (
     <div className="min-h-screen bg-[var(--cor_fundo_primaria)] text-[var(--cor_texto_escuro)]">

@@ -1,9 +1,10 @@
-﻿create extension if not exists pgcrypto;
+create extension if not exists pgcrypto;
 
 create table if not exists public.users (
   id uuid primary key references auth.users (id) on delete cascade,
   email text not null unique,
   nome_completo text,
+  senha_provisoria_ativa boolean not null default true,
   created_at timestamptz not null default timezone('utc', now()),
   updated_at timestamptz not null default timezone('utc', now())
 );
@@ -144,11 +145,12 @@ security definer
 set search_path = public
 as $$
 begin
-  insert into public.users (id, email, nome_completo)
+  insert into public.users (id, email, nome_completo, senha_provisoria_ativa)
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data->>'full_name', new.email)
+    coalesce(new.raw_user_meta_data->>'full_name', new.email),
+    true
   )
   on conflict (id) do update
   set email = excluded.email,
@@ -182,6 +184,16 @@ alter table public.despesas enable row level security;
 alter table public.despesas_cartao enable row level security;
 alter table public.orcamentos enable row level security;
 alter table public.anexos enable row level security;
+
+drop policy if exists "users_select" on public.users;
+drop policy if exists "users_update" on public.users;
+create policy "users_select"
+  on public.users for select
+  using (auth.uid() = id);
+create policy "users_update"
+  on public.users for update
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 create or replace function public.create_user_owned_policies(target_table text)
 returns void
@@ -221,14 +233,3 @@ select public.create_user_owned_policies('despesas');
 select public.create_user_owned_policies('despesas_cartao');
 select public.create_user_owned_policies('orcamentos');
 select public.create_user_owned_policies('anexos');
-
-drop policy if exists "users_select" on public.users;
-drop policy if exists "users_update" on public.users;
-create policy "users_select"
-  on public.users for select
-  using (auth.uid() = id);
-create policy "users_update"
-  on public.users for update
-  using (auth.uid() = id)
-  with check (auth.uid() = id);
-
