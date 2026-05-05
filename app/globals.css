@@ -1189,6 +1189,106 @@ button {
   color: var(--ink);
 }
 
+.real-dashboard-grid {
+  align-items: start;
+}
+
+.bar-panel h2,
+.pie-panel h2,
+.invoice-panel h2 {
+  color: rgba(34, 40, 57, 0.78);
+  font-size: 15px;
+  margin: 0 0 18px;
+}
+
+.real-bar-chart {
+  margin-left: 0;
+}
+
+.real-pie-wrap {
+  display: grid;
+  gap: 18px;
+}
+
+.real-pie {
+  filter: drop-shadow(0 14px 22px rgba(29, 36, 51, 0.12));
+  max-width: 260px;
+}
+
+.chart-legend-grid {
+  display: grid;
+  gap: 8px;
+}
+
+.chart-legend-grid span {
+  align-items: center;
+  color: rgba(34, 40, 57, 0.68);
+  display: flex;
+  font-size: 12px;
+  gap: 8px;
+}
+
+.chart-legend-grid i {
+  border-radius: 999px;
+  display: inline-block;
+  height: 12px;
+  width: 12px;
+}
+
+.empty-chart {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.48);
+  border-radius: 8px;
+  color: #4a5364;
+  display: flex;
+  min-height: 180px;
+  padding: 20px;
+}
+
+.line-chart {
+  background: rgba(255, 255, 255, 0.34);
+  border-radius: 8px;
+  width: 100%;
+}
+
+.budget-distribution {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.budget-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.budget-card div:first-child {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+}
+
+.budget-card span,
+.budget-card p {
+  color: #4a5364;
+  font-size: 13px;
+  margin: 0;
+}
+
+.budget-bar {
+  background: rgba(41, 59, 80, 0.12);
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.budget-bar i {
+  background: linear-gradient(90deg, var(--green), var(--button-hover));
+  display: block;
+  height: 100%;
+}
+
 @media (max-width: 900px) {
   .landing-hero,
   .dashboard-grid {
