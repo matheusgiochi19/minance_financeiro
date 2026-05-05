@@ -21,13 +21,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <section>
         <p className="eyebrow">Acesso seguro</p>
         <h1>Entrar</h1>
-        <p className="auth-subtitle">Use seu e-mail confirmado para acessar a area protegida.</p>
+        <p className="auth-subtitle">Use seu e-mail confirmado para acessar a área protegida.</p>
         <AuthForm
           action={signIn}
           buttonLabel="Entrar"
           footerHref="/cadastro"
           footerLabel="Criar conta"
-          footerText="Ainda nao tem conta?"
+          footerText="Ainda não tem conta?"
           redirectTo={params.redirectTo}
         />
       </section>

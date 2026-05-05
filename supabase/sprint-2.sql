@@ -144,11 +144,11 @@ set search_path = public, auth
 as $$
 begin
   if not public.is_master() then
-    raise exception 'Apenas usuarios master podem excluir usuarios.';
+    raise exception 'Apenas usuários master podem excluir usuários.';
   end if;
 
   if target_user_id = auth.uid() then
-    raise exception 'O usuario master nao pode excluir a propria conta por esta tela.';
+    raise exception 'O usuário master não pode excluir a própria conta por esta tela.';
   end if;
 
   delete from auth.users where id = target_user_id;

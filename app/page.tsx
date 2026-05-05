@@ -11,9 +11,9 @@ export default function LandingPage() {
             <Image alt="" height={34} priority src="/Minance_Icone.png" width={34} />
             <span>Minance</span>
           </div>
-          <h1>Gestao Financeira Pessoal</h1>
+          <h1>Gestão Financeira Pessoal</h1>
           <p>
-            Organize receitas, despesas, cartoes e metas em uma experiencia clara, segura e preparada para evoluir sprint a sprint.
+            Organize receitas, despesas, cartões e metas em uma experiência clara, segura e preparada para evoluir sprint a sprint.
           </p>
           <div className="landing-actions">
             <Link className="primary-button" href="/cadastro">
@@ -28,7 +28,7 @@ export default function LandingPage() {
       </section>
       <section className="landing-security">
         <ShieldCheck size={20} />
-        <span>Autenticacao via Supabase, verificacao de e-mail obrigatoria e area protegida.</span>
+        <span>Autenticação via Supabase, verificação de e-mail obrigatória e área protegida.</span>
       </section>
     </main>
   );

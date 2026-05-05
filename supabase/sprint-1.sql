@@ -110,5 +110,5 @@ for delete
 to authenticated
 using (public.is_master());
 
--- Depois de criar e confirmar o e-mail do usuario admin, promova-o:
+-- Depois de criar e confirmar o e-mail do usuário admin, promova-o:
 -- update public.profiles set role = 'master' where email = 'SEU_EMAIL_ADMIN@dominio.com';

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Minance - Gestao Financeira Pessoal",
-  description: "SaaS de gestao financeira pessoal.",
+  title: "Minance - Gestão Financeira Pessoal",
+  description: "SaaS de gestão financeira pessoal.",
   icons: {
     icon: "/Minance_Icone.png",
     shortcut: "/Minance_Icone.png",

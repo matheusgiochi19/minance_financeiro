@@ -68,7 +68,7 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
 
   if (profile?.ativo === false) {
     await supabase.auth.signOut();
-    return { message: "Seu usuario esta bloqueado. Fale com o administrador." };
+    return { message: "Seu usuário está bloqueado. Fale com o administrador." };
   }
 
   redirect(redirectTo.startsWith("/app") ? redirectTo : "/app/dashboard");

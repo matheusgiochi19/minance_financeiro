@@ -1,9 +1,11 @@
+import { Card } from "@/components/ui/card";
+
 const summaryCards = [
   { label: "Saldo Atual", value: "R$ 345,00", tone: "muted" },
   { label: "Receitas", value: "R$ 4.200,00", tone: "income" },
   { label: "Despesas", value: "R$ 3.855,00", tone: "expense" },
-  { label: "Fatura Cartoes", value: "R$ 690,00", tone: "cards" }
-];
+  { label: "Fatura Cartões", value: "R$ 690,00", tone: "cards" }
+] as const;
 
 const months = ["Jan 26", "Fev 26", "Mar 26", "Abr 26", "Mai 26", "Jun 26"];
 
@@ -13,15 +15,15 @@ export default function DashboardPage() {
       <div className="welcome">
         <p>Bem-vindo</p>
         <h1>Bem-vindo</h1>
-        <span>Abaixo, estao disponiveis as visoes sobre o mes atual</span>
+        <span>Abaixo, estão disponíveis as visões sobre o mês atual</span>
       </div>
 
       <div className="summary-grid">
         {summaryCards.map((card) => (
-          <article className={`summary-card ${card.tone}`} key={card.label}>
+          <Card className="summary-card" key={card.label} tone={card.tone}>
             <span>{card.label}</span>
             <strong>{card.value}</strong>
-          </article>
+          </Card>
         ))}
       </div>
 
@@ -56,7 +58,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="chart-panel invoice-panel" aria-label="Faturas cartao">
-          <h2>Faturas Cartao</h2>
+          <h2>Faturas Cartão</h2>
           {["Jul", "Jun", "May", "Apr", "Mar", "Fev", "Jan"].map((label, index) => (
             <div className="invoice-row" key={label}>
               <span>{label}</span>
