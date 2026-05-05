@@ -60,6 +60,17 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
     return { message: "Confirme seu e-mail antes de fazer login." };
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("ativo")
+    .eq("user_id", data.user.id)
+    .maybeSingle<{ ativo: boolean }>();
+
+  if (profile?.ativo === false) {
+    await supabase.auth.signOut();
+    return { message: "Seu usuario esta bloqueado. Fale com o administrador." };
+  }
+
   redirect(redirectTo.startsWith("/app") ? redirectTo : "/app/dashboard");
 }
 

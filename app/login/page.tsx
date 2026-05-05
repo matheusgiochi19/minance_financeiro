@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { AuthForm } from "@/components/auth-form";
 import { signIn } from "@/app/auth-actions";
 
@@ -14,6 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
   return (
     <main className="auth-page">
       <Link className="auth-logo" href="/">
+        <Image alt="" height={38} priority src="/Minance_Icone.png" width={38} />
         Minance
       </Link>
       <section>

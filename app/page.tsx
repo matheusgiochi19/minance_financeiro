@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, ShieldCheck, Wallet } from "lucide-react";
+import Image from "next/image";
+import { ArrowRight, ShieldCheck } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -7,7 +8,7 @@ export default function LandingPage() {
       <section className="landing-hero">
         <div className="landing-copy">
           <div className="product-mark">
-            <Wallet size={22} />
+            <Image alt="" height={34} priority src="/Minance_Icone.png" width={34} />
             <span>Minance</span>
           </div>
           <h1>Gestao Financeira Pessoal</h1>
@@ -22,27 +23,6 @@ export default function LandingPage() {
             <Link className="secondary-button" href="/login">
               Entrar
             </Link>
-          </div>
-        </div>
-        <div className="landing-preview" aria-label="Previa do dashboard Minance">
-          <div className="preview-top" />
-          <div className="preview-side" />
-          <div className="preview-body">
-            <span>Bem-vindo</span>
-            <strong>Matheus Souchie</strong>
-            <div className="preview-cards">
-              <b>R$ 345,00</b>
-              <b>R$ 4.200,00</b>
-              <b>R$ 3.855,00</b>
-            </div>
-            <div className="preview-chart">
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-              <i />
-            </div>
           </div>
         </div>
       </section>

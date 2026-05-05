@@ -3,7 +3,12 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Minance - Gestao Financeira Pessoal",
-  description: "SaaS de gestao financeira pessoal."
+  description: "SaaS de gestao financeira pessoal.",
+  icons: {
+    icon: "/Minance_Icone.png",
+    shortcut: "/Minance_Icone.png",
+    apple: "/Minance_Icone.png"
+  }
 };
 
 export default function RootLayout({
