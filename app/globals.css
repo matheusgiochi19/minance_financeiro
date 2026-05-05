@@ -750,6 +750,13 @@ button {
   margin-bottom: 30px;
 }
 
+.page-heading.with-action {
+  align-items: end;
+  display: flex;
+  gap: 18px;
+  justify-content: space-between;
+}
+
 .page-heading p {
   color: var(--terracotta);
   font-size: 13px;
@@ -766,6 +773,36 @@ button {
 .page-heading span,
 .admin-alert {
   color: #4a5364;
+}
+
+.secondary-link-button,
+.table-link-button {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 800;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 12px;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.secondary-link-button {
+  background: rgba(41, 59, 80, 0.12);
+  color: var(--ink);
+  min-height: 46px;
+  padding: 0 20px;
+}
+
+.table-link-button {
+  background: var(--navy);
+  color: #fff;
+}
+
+.secondary-link-button:hover,
+.table-link-button:hover {
+  background: var(--button-hover);
+  color: var(--ink);
 }
 
 .ui-table-wrap {
@@ -847,6 +884,59 @@ button {
   padding: 18px;
 }
 
+.entity-form-card {
+  max-width: 720px;
+  padding: 22px;
+}
+
+.entity-form-card h2 {
+  font-size: 20px;
+  margin: 0 0 18px;
+}
+
+.entity-form,
+.expense-edit-form {
+  display: grid;
+  gap: 16px;
+}
+
+.entity-form label,
+.expense-edit-form label {
+  display: grid;
+  gap: 8px;
+}
+
+.entity-form label span,
+.expense-edit-form label span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.entity-form input,
+.expense-edit-form input,
+.expense-edit-form select {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 42px;
+  outline: none;
+  padding: 0 12px;
+}
+
+.entity-form input:focus,
+.expense-edit-form input:focus,
+.expense-edit-form select:focus {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
 .record-form-card h2 {
   font-size: 18px;
   margin: 0 0 16px;
@@ -908,50 +998,33 @@ button {
   margin-bottom: 24px;
 }
 
-.expense-form-card,
 .expense-filters-card {
   margin-bottom: 22px;
   padding: 18px;
 }
 
-.expense-form-card h2 {
-  font-size: 18px;
-  margin: 0 0 16px;
-}
-
-.expense-form,
 .expense-filters {
   align-items: end;
   display: grid;
   gap: 12px;
 }
 
-.expense-form {
-  grid-template-columns: minmax(180px, 1.4fr) minmax(120px, 0.7fr) minmax(120px, 0.7fr) minmax(150px, 1fr) minmax(150px, 1fr) minmax(170px, 1fr) auto;
-}
-
 .expense-filters {
   grid-template-columns: minmax(220px, 1.4fr) minmax(130px, 0.8fr) minmax(160px, 1fr) minmax(160px, 1fr) auto;
 }
 
-.expense-form label,
 .expense-filters label {
   display: grid;
   gap: 8px;
 }
 
-.expense-form label span,
 .expense-filters label span {
   font-size: 13px;
   font-weight: 900;
 }
 
-.expense-form input,
-.expense-form select,
 .expense-filters input,
-.expense-filters select,
-.expense-row-form input,
-.expense-row-form select {
+.expense-filters select {
   background: rgba(255, 255, 255, 0.86);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -961,34 +1034,26 @@ button {
   padding: 0 12px;
 }
 
-.expense-form input:focus,
-.expense-form select:focus,
 .expense-filters input:focus,
-.expense-filters select:focus,
-.expense-row-form input:focus,
-.expense-row-form select:focus {
+.expense-filters select:focus {
   border-color: var(--terracotta);
   box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
 }
 
 .expenses-table {
-  min-width: 1320px;
+  min-width: 1040px;
 }
 
-.expenses-table th:first-child,
-.expenses-table td:first-child {
-  min-width: 650px;
+.clean-expenses-table th {
+  background: rgba(150, 137, 120, 0.42);
 }
 
-.expense-row-form {
-  display: grid;
-  gap: 8px;
-  grid-template-columns: minmax(150px, 1.2fr) 100px 110px 130px 130px minmax(140px, 1fr) auto;
+.clean-expenses-table td {
+  background: rgba(255, 255, 255, 0.56);
 }
 
-.expense-row-form input,
-.expense-row-form select {
-  min-width: 0;
+.expense-edit-card {
+  max-width: 820px;
 }
 
 .attachment-link {
@@ -1009,6 +1074,12 @@ button {
 .expense-status-ab {
   background: rgba(255, 177, 98, 0.22);
   color: #7b4a08;
+}
+
+.current-attachment {
+  color: #4a5364;
+  font-size: 13px;
+  margin: -4px 0 0;
 }
 
 @media (max-width: 900px) {
@@ -1087,8 +1158,13 @@ button {
     width: 100%;
   }
 
+  .page-heading.with-action,
+  .form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .expense-summary-grid,
-  .expense-form,
   .expense-filters {
     grid-template-columns: 1fr;
   }

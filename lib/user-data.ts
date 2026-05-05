@@ -35,6 +35,17 @@ export async function listUserRecords(table: UserTableName) {
     .returns<NamedUserRecord[]>();
 }
 
+export async function getUserRecord(table: UserTableName, id: string) {
+  const { supabase, user } = await requireAuthenticatedUser();
+
+  return supabase
+    .from(table)
+    .select("id,nome,user_id,created_at,updated_at")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle<NamedUserRecord>();
+}
+
 export function normalizeName(formData: FormData) {
   return String(formData.get("nome") || "").trim();
 }

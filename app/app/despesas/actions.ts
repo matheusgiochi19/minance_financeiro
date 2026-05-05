@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { parseCurrency, getExpenseStatus } from "@/lib/expenses";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 
@@ -63,6 +64,7 @@ export async function createDespesa(formData: FormData) {
   }
 
   revalidatePath("/app/despesas");
+  redirect("/app/despesas");
 }
 
 export async function updateDespesa(formData: FormData) {
@@ -93,6 +95,7 @@ export async function updateDespesa(formData: FormData) {
   }
 
   revalidatePath("/app/despesas");
+  redirect("/app/despesas");
 }
 
 export async function deleteDespesa(formData: FormData) {

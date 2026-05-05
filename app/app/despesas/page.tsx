@@ -1,4 +1,5 @@
-import { createDespesa, deleteDespesa, markDespesaAsPaid, updateDespesa } from "@/app/app/despesas/actions";
+import Link from "next/link";
+import { deleteDespesa, markDespesaAsPaid } from "@/app/app/despesas/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -87,10 +88,13 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
 
   return (
     <section className="expenses-page">
-      <div className="page-heading">
-        <p>Movimentação</p>
-        <h1>Despesas</h1>
-        <span>Cadastre, filtre e acompanhe as despesas do mês.</span>
+      <div className="page-heading with-action">
+        <div>
+          <p>Movimentação</p>
+          <h1>Despesas</h1>
+          <span>Cadastre, filtre e acompanhe as despesas do mês.</span>
+        </div>
+        <Link className="primary-button" href="/app/despesas/nova">Nova despesa</Link>
       </div>
 
       <div className="expense-summary-grid">
@@ -107,51 +111,6 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
           <strong>{formatCurrency(totals.total)}</strong>
         </Card>
       </div>
-
-      <Card className="record-form-card expense-form-card">
-        <h2>Nova despesa</h2>
-        <form action={createDespesa} className="expense-form" encType="multipart/form-data">
-          <label>
-            <span>Descrição</span>
-            <input maxLength={120} name="descricao" placeholder="Ex.: Aluguel" required />
-          </label>
-          <label>
-            <span>Valor</span>
-            <input inputMode="decimal" name="valor" placeholder="0,00" required />
-          </label>
-          <label>
-            <span>Status</span>
-            <select defaultValue="p" name="status">
-              {statusOptions.map((status) => (
-                <option key={status.value} value={status.value}>{status.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Categoria</span>
-            <select name="categoria_id">
-              <option value="">Sem categoria</option>
-              {(categories.data || []).map((category) => (
-                <option key={category.id} value={category.id}>{category.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Bolso</span>
-            <select name="bolso_id">
-              <option value="">Sem bolso</option>
-              {(pockets.data || []).map((pocket) => (
-                <option key={pocket.id} value={pocket.id}>{pocket.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Anexo</span>
-            <input name="anexo" type="file" />
-          </label>
-          <Button type="submit">Adicionar</Button>
-        </form>
-      </Card>
 
       <Card className="expense-filters-card">
         <form className="expense-filters">
@@ -193,11 +152,12 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
       {error ? <p className="admin-alert">Não foi possível carregar despesas: {error.message}</p> : null}
 
       <TableWrap>
-        <Table className="expenses-table">
+        <Table className="expenses-table clean-expenses-table">
           <TableHead>
             <TableRow>
-              <TableHeader>Despesa</TableHeader>
-              <TableHeader>Status</TableHeader>
+              <TableHeader>Situação</TableHeader>
+              <TableHeader>Data</TableHeader>
+              <TableHeader>Descrição</TableHeader>
               <TableHeader>Categoria</TableHeader>
               <TableHeader>Bolso</TableHeader>
               <TableHeader>Valor</TableHeader>
@@ -208,40 +168,16 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
           <TableBody>
             {(expenses || []).length === 0 ? (
               <TableRow>
-                <TableCell className="empty-cell" colSpan={7}>Nenhuma despesa encontrada.</TableCell>
+                <TableCell className="empty-cell" colSpan={8}>Nenhuma despesa encontrada.</TableCell>
               </TableRow>
             ) : null}
             {(expenses || []).map((expense) => {
               const attachmentUrl = attachmentUrls.get(expense.id);
               return (
                 <TableRow key={expense.id}>
-                  <TableCell>
-                    <form action={updateDespesa} className="expense-row-form" encType="multipart/form-data">
-                      <input name="id" type="hidden" value={expense.id} />
-                      <input defaultValue={expense.descricao} maxLength={120} name="descricao" required />
-                      <input defaultValue={String(expense.valor).replace(".", ",")} inputMode="decimal" name="valor" required />
-                      <select defaultValue={expense.status} name="status">
-                        {statusOptions.map((status) => (
-                          <option key={status.value} value={status.value}>{status.label}</option>
-                        ))}
-                      </select>
-                      <select defaultValue={expense.categoria_id || ""} name="categoria_id">
-                        <option value="">Sem categoria</option>
-                        {(categories.data || []).map((category) => (
-                          <option key={category.id} value={category.id}>{category.nome}</option>
-                        ))}
-                      </select>
-                      <select defaultValue={expense.bolso_id || ""} name="bolso_id">
-                        <option value="">Sem bolso</option>
-                        {(pockets.data || []).map((pocket) => (
-                          <option key={pocket.id} value={pocket.id}>{pocket.nome}</option>
-                        ))}
-                      </select>
-                      <input name="anexo" type="file" />
-                      <Button size="sm" type="submit">Salvar</Button>
-                    </form>
-                  </TableCell>
                   <TableCell><span className={`status-pill expense-status-${expense.status}`}>{expenseStatusLabels[expense.status]}</span></TableCell>
+                  <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(expense.created_at))}</TableCell>
+                  <TableCell><strong>{expense.descricao}</strong></TableCell>
                   <TableCell>{expense.categorias?.nome || "-"}</TableCell>
                   <TableCell>{expense.bolsos?.nome || "-"}</TableCell>
                   <TableCell>{formatCurrency(expense.valor)}</TableCell>
@@ -250,6 +186,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
                   </TableCell>
                   <TableCell>
                     <div className="table-actions">
+                      <Link className="table-link-button" href={`/app/despesas/${expense.id}/editar`}>Editar</Link>
                       <form action={markDespesaAsPaid}>
                         <input name="id" type="hidden" value={expense.id} />
                         <Button disabled={expense.status === "pp"} size="sm" type="submit" variant="secondary">Pago</Button>

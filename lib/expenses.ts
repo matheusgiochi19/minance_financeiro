@@ -63,6 +63,17 @@ export async function listExpenseOptions() {
   return { categories, pockets, user };
 }
 
+export async function getUserExpense(id: string) {
+  const { supabase, user } = await requireAuthenticatedUser();
+
+  return supabase
+    .from("despesas")
+    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .eq("id", id)
+    .eq("user_id", user.id)
+    .maybeSingle<Expense>();
+}
+
 export async function getExpenseAttachmentUrl(path: string | null) {
   if (!path) {
     return null;
