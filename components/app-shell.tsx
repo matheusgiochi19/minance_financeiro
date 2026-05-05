@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { signOut } from "@/app/auth-actions";
 import type { AppRole } from "@/lib/profiles";
+import { APP_VERSION } from "@/lib/version";
 
 const baseNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/app/dashboard" },
@@ -64,15 +65,18 @@ export function AppShell({ children, role, userEmail }: AppShellProps) {
             );
           })}
         </nav>
-        <button
-          aria-label={collapsed ? "Expandir sidebar" : "Reduzir sidebar"}
-          className="sidebar-toggle"
-          onClick={() => setCollapsed((value) => !value)}
-          title={collapsed ? "Expandir" : "Reduzir"}
-          type="button"
-        >
-          <Menu aria-hidden size={24} />
-        </button>
+        <div className="sidebar-footer">
+          <button
+            aria-label={collapsed ? "Expandir sidebar" : "Reduzir sidebar"}
+            className="sidebar-toggle"
+            onClick={() => setCollapsed((value) => !value)}
+            title={collapsed ? "Expandir" : "Reduzir"}
+            type="button"
+          >
+            <Menu aria-hidden size={24} />
+          </button>
+          <span className="app-version">{APP_VERSION}</span>
+        </div>
       </aside>
       <div className="app-content">
         <header className="topbar">
@@ -81,13 +85,13 @@ export function AppShell({ children, role, userEmail }: AppShellProps) {
               <LogOut size={20} />
             </button>
           </form>
-          <button aria-label="Configurações" className="icon-button" type="button">
+          <Link aria-label="Configurações" className="icon-button" href="/app/configuracoes">
             <Settings size={20} />
-          </button>
-          <div className="user-chip" title={userEmail || "Usuário"}>
+          </Link>
+          <Link className="user-chip" href="/app/perfil" title={userEmail || "Usuário"}>
             <div className="avatar">{userEmail?.slice(0, 1).toUpperCase() || "M"}</div>
             <span>{userEmail || "Usuário"}</span>
-          </div>
+          </Link>
         </header>
         <main className="app-surface">{children}</main>
       </div>

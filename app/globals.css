@@ -483,6 +483,25 @@ button {
   border-radius: 8px;
 }
 
+.sidebar-footer {
+  align-items: center;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+
+.app-version,
+.auth-version {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.auth-version {
+  margin-top: 14px;
+  text-align: center;
+}
+
 .app-content {
   display: grid;
   grid-template-rows: 64px 1fr;
@@ -539,6 +558,60 @@ button {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.onboarding-panel {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: minmax(180px, 1fr) auto auto;
+  margin-bottom: 24px;
+  padding: 16px;
+}
+
+.onboarding-panel p,
+.onboarding-panel h2 {
+  margin: 0;
+}
+
+.onboarding-panel p {
+  color: var(--terracotta);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.onboarding-panel h2 {
+  font-size: 18px;
+}
+
+.onboarding-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.onboarding-steps a,
+.onboarding-panel button {
+  align-items: center;
+  background: rgba(41, 59, 80, 0.1);
+  border: 0;
+  border-radius: 8px;
+  color: var(--ink);
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 900;
+  gap: 8px;
+  min-height: 36px;
+  padding: 0 12px;
+}
+
+.onboarding-steps a:hover,
+.onboarding-panel button:hover {
+  background: var(--button-hover);
 }
 
 .app-surface {
@@ -1287,6 +1360,46 @@ button {
   background: linear-gradient(90deg, var(--green), var(--button-hover));
   display: block;
   height: 100%;
+}
+
+.settings-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.muted-copy {
+  color: #4a5364;
+  line-height: 1.5;
+  margin: 0 0 18px;
+}
+
+.profile-photo {
+  background-position: center;
+  background-size: cover;
+  border-radius: 8px;
+  height: 160px;
+  margin-bottom: 16px;
+  object-fit: cover;
+  width: 160px;
+}
+
+@media print {
+  .sidebar,
+  .topbar,
+  .no-print,
+  .onboarding-panel {
+    display: none !important;
+  }
+
+  .app-frame,
+  .app-content {
+    display: block;
+  }
+
+  .app-surface {
+    padding: 0;
+  }
 }
 
 @media (max-width: 900px) {

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { OnboardingPanel } from "@/components/onboarding-panel";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/profiles";
 
@@ -22,6 +23,7 @@ export default async function ProtectedLayout({
 
   return (
     <AppShell role={profile?.role || "user"} userEmail={user.email}>
+      {profile?.onboarding_hidden ? null : <OnboardingPanel />}
       {children}
     </AppShell>
   );

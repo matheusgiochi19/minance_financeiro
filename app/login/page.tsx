@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { AuthForm } from "@/components/auth-form";
 import { signIn } from "@/app/auth-actions";
+import { APP_VERSION } from "@/lib/version";
 
 type LoginPageProps = {
   searchParams: Promise<{
@@ -30,6 +31,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           footerText="Ainda não tem conta?"
           redirectTo={params.redirectTo}
         />
+        <p className="auth-version">{APP_VERSION}</p>
       </section>
     </main>
   );

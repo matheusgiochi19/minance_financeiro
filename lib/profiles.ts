@@ -8,6 +8,10 @@ export type Profile = {
   email: string;
   role: AppRole;
   ativo: boolean;
+  foto_path: string | null;
+  juros_atraso: number | null;
+  onboarding_hidden: boolean;
+  tema: "light" | "dark";
   created_at: string;
   updated_at: string;
 };
@@ -24,7 +28,7 @@ export async function getCurrentProfile() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id,user_id,email,role,ativo,created_at,updated_at")
+    .select("id,user_id,email,role,ativo,foto_path,juros_atraso,onboarding_hidden,tema,created_at,updated_at")
     .eq("user_id", user.id)
     .maybeSingle<Profile>();
 
