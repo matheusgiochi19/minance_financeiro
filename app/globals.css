@@ -833,6 +833,69 @@ button {
   padding: 0 10px;
 }
 
+.records-layout {
+  display: grid;
+  gap: 22px;
+}
+
+.record-form-card {
+  padding: 18px;
+}
+
+.record-form-card h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.record-form,
+.inline-edit-form {
+  align-items: end;
+  display: flex;
+  gap: 12px;
+}
+
+.record-form label {
+  display: grid;
+  flex: 1;
+  gap: 8px;
+}
+
+.record-form label span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.record-form input,
+.inline-edit-form input {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 40px;
+  outline: none;
+  padding: 0 12px;
+}
+
+.record-form input:focus,
+.inline-edit-form input:focus {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
+}
+
+.inline-edit-form {
+  align-items: center;
+}
+
+.inline-edit-form input {
+  min-width: 260px;
+}
+
+.empty-cell {
+  color: #4a5364;
+  padding: 28px 16px;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .landing-hero,
   .dashboard-grid {
@@ -896,5 +959,16 @@ button {
 
   .bar-chart {
     gap: 18px;
+  }
+
+  .record-form,
+  .inline-edit-form {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .inline-edit-form input {
+    min-width: 0;
+    width: 100%;
   }
 }
