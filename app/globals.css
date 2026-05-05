@@ -120,6 +120,11 @@ button {
 
 .secondary-button,
 .ui-button-secondary {
+  background: rgba(41, 59, 80, 0.12);
+  color: var(--ink);
+}
+
+.secondary-button {
   background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
@@ -896,6 +901,116 @@ button {
   text-align: center;
 }
 
+.expense-summary-grid {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  margin-bottom: 24px;
+}
+
+.expense-form-card,
+.expense-filters-card {
+  margin-bottom: 22px;
+  padding: 18px;
+}
+
+.expense-form-card h2 {
+  font-size: 18px;
+  margin: 0 0 16px;
+}
+
+.expense-form,
+.expense-filters {
+  align-items: end;
+  display: grid;
+  gap: 12px;
+}
+
+.expense-form {
+  grid-template-columns: minmax(180px, 1.4fr) minmax(120px, 0.7fr) minmax(120px, 0.7fr) minmax(150px, 1fr) minmax(150px, 1fr) minmax(170px, 1fr) auto;
+}
+
+.expense-filters {
+  grid-template-columns: minmax(220px, 1.4fr) minmax(130px, 0.8fr) minmax(160px, 1fr) minmax(160px, 1fr) auto;
+}
+
+.expense-form label,
+.expense-filters label {
+  display: grid;
+  gap: 8px;
+}
+
+.expense-form label span,
+.expense-filters label span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.expense-form input,
+.expense-form select,
+.expense-filters input,
+.expense-filters select,
+.expense-row-form input,
+.expense-row-form select {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 40px;
+  outline: none;
+  padding: 0 12px;
+}
+
+.expense-form input:focus,
+.expense-form select:focus,
+.expense-filters input:focus,
+.expense-filters select:focus,
+.expense-row-form input:focus,
+.expense-row-form select:focus {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
+}
+
+.expenses-table {
+  min-width: 1320px;
+}
+
+.expenses-table th:first-child,
+.expenses-table td:first-child {
+  min-width: 650px;
+}
+
+.expense-row-form {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(150px, 1.2fr) 100px 110px 130px 130px minmax(140px, 1fr) auto;
+}
+
+.expense-row-form input,
+.expense-row-form select {
+  min-width: 0;
+}
+
+.attachment-link {
+  color: var(--terracotta);
+  font-weight: 900;
+}
+
+.expense-status-p {
+  background: rgba(255, 118, 84, 0.16);
+  color: #b23a22;
+}
+
+.expense-status-pp {
+  background: rgba(60, 93, 18, 0.14);
+  color: var(--green);
+}
+
+.expense-status-ab {
+  background: rgba(255, 177, 98, 0.22);
+  color: #7b4a08;
+}
+
 @media (max-width: 900px) {
   .landing-hero,
   .dashboard-grid {
@@ -970,5 +1085,11 @@ button {
   .inline-edit-form input {
     min-width: 0;
     width: 100%;
+  }
+
+  .expense-summary-grid,
+  .expense-form,
+  .expense-filters {
+    grid-template-columns: 1fr;
   }
 }
