@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { expenseStatusLabels, formatCurrency, type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
 import type { CartaoDespesa } from "@/lib/income-cards";
@@ -47,7 +47,7 @@ export function CartaoDespesaForm({ action, cartaoId, categories, defaultDespesa
           </select>
         </label>
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton>Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href={`/app/cartoes/${cartaoId}/despesas`}>Cancelar</Link>
         </div>
       </form>

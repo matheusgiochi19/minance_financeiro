@@ -1,37 +1,45 @@
 import Link from "next/link";
 import { deleteReceita } from "@/app/app/receitas/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
-import { Button } from "@/components/ui/button";
+import { FinancialFilters } from "@/components/financial-filters";
+import { MonthFilter } from "@/components/month-filter";
+import { Pagination } from "@/components/pagination";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
+import { calcularTotalReceitas, getPeriodoMes } from "@/services/finance.service";
 import { formatCurrency, listExpenseOptions } from "@/lib/expenses";
 import type { Receita } from "@/lib/income-cards";
 import { createClient } from "@/lib/supabase/server";
-import { MonthFilter } from "@/components/month-filter";
-import { calcularTotalReceitas, getPeriodoMes } from "@/services/finance.service";
 
 type ReceitasPageProps = {
-  searchParams: Promise<{ bolso?: string; categoria?: string; mes?: string; q?: string }>;
+  searchParams: Promise<{ bolso?: string; categoria?: string; mes?: string; page?: string; q?: string }>;
 };
+
+const PAGE_SIZE = 20;
 
 export default async function ReceitasPage({ searchParams }: ReceitasPageProps) {
   const params = await searchParams;
   const { categories, pockets, user } = await listExpenseOptions();
   const supabase = await createClient();
   const periodo = getPeriodoMes(params.mes);
+  const page = Math.max(Number(params.page || 1), 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
+
   let query = supabase
     .from("receitas")
-    .select("id,descricao,valor,categoria_id,bolso_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,categoria_id,bolso_id,data_competencia,categorias(nome),bolsos(nome)", { count: "exact" })
     .eq("user_id", user.id)
     .gte("data_competencia", periodo.inicio)
     .lt("data_competencia", periodo.fim)
-    .order("data_competencia", { ascending: false });
+    .order("data_competencia", { ascending: false })
+    .range(from, to);
 
   if (params.q) query = query.ilike("descricao", `%${params.q}%`);
   if (params.categoria) query = query.eq("categoria_id", params.categoria);
   if (params.bolso) query = query.eq("bolso_id", params.bolso);
 
-  const { data: receitas, error } = await query.returns<Receita[]>();
+  const { count, data: receitas, error } = await query.returns<Receita[]>();
   const totalMes = await calcularTotalReceitas(user.id, periodo);
 
   return (
@@ -47,23 +55,12 @@ export default async function ReceitasPage({ searchParams }: ReceitasPageProps) 
       <MonthFilter month={periodo.mes} />
 
       <div className="expense-summary-grid">
-        <Card className="summary-card" tone="income">
-          <span>Total mês</span>
-          <strong>{formatCurrency(totalMes)}</strong>
-        </Card>
-        <Card className="summary-card" tone="muted">
-          <span>Registros</span>
-          <strong>{receitas?.length || 0}</strong>
-        </Card>
+        <Card className="summary-card" tone="income"><span>Total mês</span><strong>{formatCurrency(totalMes)}</strong></Card>
+        <Card className="summary-card" tone="muted"><span>Registros</span><strong>{count || 0}</strong></Card>
       </div>
 
       <Card className="expense-filters-card">
-        <form className="expense-filters">
-          <label><span>Busca</span><input defaultValue={params.q || ""} name="q" placeholder="Buscar descrição" /></label>
-          <label><span>Categoria</span><select defaultValue={params.categoria || ""} name="categoria"><option value="">Todas</option>{(categories.data || []).map((category) => <option key={category.id} value={category.id}>{category.nome}</option>)}</select></label>
-          <label><span>Bolso</span><select defaultValue={params.bolso || ""} name="bolso"><option value="">Todos</option>{(pockets.data || []).map((pocket) => <option key={pocket.id} value={pocket.id}>{pocket.nome}</option>)}</select></label>
-          <Button type="submit">Filtrar</Button>
-        </form>
+        <FinancialFilters categories={categories.data || []} pockets={pockets.data || []} />
       </Card>
 
       {error ? <p className="admin-alert">Não foi possível carregar receitas: {error.message}</p> : null}
@@ -86,6 +83,7 @@ export default async function ReceitasPage({ searchParams }: ReceitasPageProps) 
           </TableBody>
         </Table>
       </TableWrap>
+      <Pagination page={page} pageSize={PAGE_SIZE} total={count || 0} params={{ bolso: params.bolso, categoria: params.categoria, mes: periodo.mes, q: params.q }} />
     </section>
   );
 }

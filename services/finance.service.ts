@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export type PeriodoFinanceiro = {
@@ -18,7 +19,7 @@ export function getPeriodoMes(mes?: string): PeriodoFinanceiro & { mes: string }
   };
 }
 
-export async function calcularTotalReceitas(userId: string, periodo: PeriodoFinanceiro) {
+export const calcularTotalReceitas = cache(async (userId: string, periodo: PeriodoFinanceiro) => {
   const supabase = await createClient();
   const { data } = await supabase.rpc("calcular_total_receitas", {
     p_fim: periodo.fim,
@@ -26,9 +27,9 @@ export async function calcularTotalReceitas(userId: string, periodo: PeriodoFina
     p_user_id: userId
   });
   return Number(data || 0);
-}
+});
 
-export async function calcularTotalDespesas(userId: string, periodo: PeriodoFinanceiro) {
+export const calcularTotalDespesas = cache(async (userId: string, periodo: PeriodoFinanceiro) => {
   const supabase = await createClient();
   const { data } = await supabase.rpc("calcular_total_despesas", {
     p_fim: periodo.fim,
@@ -36,9 +37,9 @@ export async function calcularTotalDespesas(userId: string, periodo: PeriodoFina
     p_user_id: userId
   });
   return Number(data || 0);
-}
+});
 
-export async function calcularFaturaCartao(userId: string, mes: string) {
+export const calcularFaturaCartao = cache(async (userId: string, mes: string) => {
   const supabase = await createClient();
   const periodo = getPeriodoMes(mes);
   const { data } = await supabase.rpc("calcular_fatura_cartao", {
@@ -47,9 +48,9 @@ export async function calcularFaturaCartao(userId: string, mes: string) {
     p_user_id: userId
   });
   return Number(data || 0);
-}
+});
 
-export async function calcularSaldo(userId: string, periodo: PeriodoFinanceiro) {
+export const calcularSaldo = cache(async (userId: string, periodo: PeriodoFinanceiro) => {
   const supabase = await createClient();
   const { data } = await supabase.rpc("calcular_saldo", {
     p_fim: periodo.fim,
@@ -57,4 +58,4 @@ export async function calcularSaldo(userId: string, periodo: PeriodoFinanceiro) 
     p_user_id: userId
   });
   return Number(data || 0);
-}
+});

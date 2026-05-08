@@ -2,20 +2,32 @@ import Link from "next/link";
 import { deleteCartao } from "@/app/app/cartoes/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { MonthFilter } from "@/components/month-filter";
+import { Pagination } from "@/components/pagination";
 import { formatCurrency } from "@/lib/expenses";
 import type { Cartao } from "@/lib/income-cards";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { getPeriodoMes } from "@/services/finance.service";
 
-type CartoesPageProps = { searchParams: Promise<{ mes?: string }> };
+type CartoesPageProps = { searchParams: Promise<{ mes?: string; page?: string }> };
+
+const PAGE_SIZE = 12;
 
 export default async function CartoesPage({ searchParams }: CartoesPageProps) {
   const params = await searchParams;
   const periodo = getPeriodoMes(params.mes);
+  const page = Math.max(Number(params.page || 1), 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
   const { user } = await requireAuthenticatedUser();
   const supabase = await createClient();
-  const { data: cartoes, error } = await supabase.from("cartoes").select("id,nome,limite,cor,user_id,created_at,updated_at").eq("user_id", user.id).order("created_at", { ascending: false }).returns<Cartao[]>();
+  const { count, data: cartoes, error } = await supabase
+    .from("cartoes")
+    .select("id,nome,limite,cor", { count: "exact" })
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .range(from, to)
+    .returns<Cartao[]>();
   const invoicePairs = await Promise.all(
     (cartoes || []).map(async (cartao) => {
       const { data } = await supabase.from("cartao_despesas").select("valor").eq("user_id", user.id).eq("cartao_id", cartao.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
@@ -50,6 +62,7 @@ export default async function CartoesPage({ searchParams }: CartoesPageProps) {
           </article>
         ))}
       </div>
+      <Pagination page={page} pageSize={PAGE_SIZE} total={count || 0} params={{ mes: periodo.mes }} />
     </section>
   );
 }

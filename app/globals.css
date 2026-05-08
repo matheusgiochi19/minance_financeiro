@@ -1145,6 +1145,39 @@ button {
   box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
 }
 
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.pagination a,
+.pagination span {
+  align-items: center;
+  border-radius: 8px;
+  display: inline-flex;
+  font-weight: 900;
+  min-height: 38px;
+  padding: 0 12px;
+}
+
+.pagination a {
+  background: var(--navy);
+  color: #fff;
+}
+
+.pagination a:hover {
+  background: var(--button-hover);
+  color: var(--ink);
+}
+
+.pagination a.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+}
+
 .expenses-table {
   min-width: 1040px;
 }
@@ -1350,6 +1383,17 @@ button {
   padding: 20px;
 }
 
+.chart-lazy-placeholder {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.48);
+  border-radius: 8px;
+  color: #4a5364;
+  display: flex;
+  grid-column: 1 / -1;
+  min-height: 260px;
+  padding: 20px;
+}
+
 .line-chart {
   background: rgba(255, 255, 255, 0.34);
   border-radius: 8px;
@@ -1414,6 +1458,79 @@ button {
   margin-bottom: 16px;
   object-fit: cover;
   width: 160px;
+}
+
+.page-skeleton {
+  display: grid;
+  gap: 18px;
+}
+
+.skeleton-line,
+.skeleton-card,
+.skeleton-row {
+  animation: skeleton-pulse 1.2s ease-in-out infinite;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.38));
+  background-size: 200% 100%;
+  border-radius: 8px;
+}
+
+.skeleton-title {
+  height: 36px;
+  max-width: 280px;
+}
+
+.skeleton-subtitle {
+  height: 18px;
+  max-width: 520px;
+}
+
+.skeleton-grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(4, minmax(140px, 1fr));
+}
+
+.skeleton-card {
+  height: 86px;
+}
+
+.skeleton-table {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.skeleton-row {
+  height: 48px;
+}
+
+.error-state {
+  display: grid;
+  gap: 12px;
+  max-width: 520px;
+}
+
+.error-state p {
+  color: var(--terracotta);
+  font-size: 13px;
+  font-weight: 900;
+  margin: 0;
+  text-transform: uppercase;
+}
+
+.error-state h1 {
+  font-size: 32px;
+  margin: 0;
+}
+
+.error-state span {
+  color: #4a5364;
+}
+
+@keyframes skeleton-pulse {
+  to {
+    background-position: -200% 0;
+  }
 }
 
 @media print {
@@ -1518,6 +1635,10 @@ button {
 
   .expense-summary-grid,
   .expense-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .skeleton-grid {
     grid-template-columns: 1fr;
   }
 

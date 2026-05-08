@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { deleteCartaoDespesa } from "@/app/app/cartoes/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { MonthFilter } from "@/components/month-filter";
+import { Pagination } from "@/components/pagination";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
 import { expenseStatusLabels, formatCurrency, type ExpenseStatus } from "@/lib/expenses";
@@ -13,28 +14,35 @@ import { getPeriodoMes } from "@/services/finance.service";
 
 type CartaoDespesasPageProps = {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ mes?: string }>;
+  searchParams: Promise<{ mes?: string; page?: string }>;
 };
+
+const PAGE_SIZE = 20;
 
 export default async function CartaoDespesasPage({ params, searchParams }: CartaoDespesasPageProps) {
   const { id } = await params;
   const filters = await searchParams;
   const periodo = getPeriodoMes(filters.mes);
+  const page = Math.max(Number(filters.page || 1), 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
   const [{ data: cartao }, { user }] = await Promise.all([getUserCartao(id), requireAuthenticatedUser()]);
   if (!cartao) notFound();
 
   const supabase = await createClient();
-  const { data: despesas, error } = await supabase
+  const { count, data: despesas, error } = await supabase
     .from("cartao_despesas")
-    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,created_at,updated_at,categorias(nome)")
+    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,categorias(nome)", { count: "exact" })
     .eq("cartao_id", id)
     .eq("user_id", user.id)
     .gte("data_competencia", periodo.inicio)
     .lt("data_competencia", periodo.fim)
     .order("data_competencia", { ascending: false })
+    .range(from, to)
     .returns<CartaoDespesa[]>();
 
-  const totalFatura = (despesas || []).reduce((total, despesa) => total + Number(despesa.valor || 0), 0);
+  const { data: fatura } = await supabase.from("cartao_despesas").select("valor").eq("cartao_id", id).eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
+  const totalFatura = (fatura || []).reduce((total, despesa) => total + Number(despesa.valor || 0), 0);
 
   return (
     <section className="expenses-page">
@@ -87,6 +95,7 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
           </TableBody>
         </Table>
       </TableWrap>
+      <Pagination page={page} pageSize={PAGE_SIZE} total={count || 0} params={{ mes: periodo.mes }} />
     </section>
   );
 }

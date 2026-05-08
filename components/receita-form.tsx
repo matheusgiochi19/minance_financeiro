@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/expenses";
 import type { Receita } from "@/lib/income-cards";
@@ -46,7 +46,7 @@ export function ReceitaForm({ action, categories, defaultReceita, pockets }: Rec
           </select>
         </label>
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton>Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href="/app/receitas">Cancelar</Link>
         </div>
       </form>

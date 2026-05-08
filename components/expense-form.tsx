@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { expenseStatusLabels, formatCurrency, type Expense, type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
 
@@ -64,7 +64,7 @@ export function ExpenseForm({ action, categories, defaultExpense, pockets, title
         </label>
         {defaultExpense?.anexo_nome ? <p className="current-attachment">Anexo atual: {defaultExpense.anexo_nome}</p> : null}
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton pendingLabel="Enviando anexo...">Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href="/app/despesas">Cancelar</Link>
         </div>
       </form>

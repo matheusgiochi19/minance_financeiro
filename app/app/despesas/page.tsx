@@ -1,80 +1,66 @@
 import Link from "next/link";
 import { deleteDespesa, markDespesaAsPaid } from "@/app/app/despesas/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
-import { Button } from "@/components/ui/button";
+import { FinancialFilters } from "@/components/financial-filters";
+import { MonthFilter } from "@/components/month-filter";
+import { Pagination } from "@/components/pagination";
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
+import { calcularTotalDespesas, getPeriodoMes } from "@/services/finance.service";
 import { expenseStatusLabels, formatCurrency, getExpenseAttachmentUrl, listExpenseOptions, type Expense, type ExpenseStatus } from "@/lib/expenses";
 import { createClient } from "@/lib/supabase/server";
-import { MonthFilter } from "@/components/month-filter";
-import { calcularTotalDespesas, getPeriodoMes } from "@/services/finance.service";
 
 type DespesasPageProps = {
   searchParams: Promise<{
     bolso?: string;
     categoria?: string;
+    mes?: string;
+    page?: string;
     q?: string;
     status?: ExpenseStatus | "";
-    mes?: string;
   }>;
 };
 
-const statusOptions: Array<{ label: string; value: ExpenseStatus }> = [
-  { label: "Pendente", value: "p" },
-  { label: "Paga", value: "pp" },
-  { label: "Aberta", value: "ab" }
-];
+const PAGE_SIZE = 20;
 
 export default async function DespesasPage({ searchParams }: DespesasPageProps) {
   const params = await searchParams;
   const { categories, pockets, user } = await listExpenseOptions();
   const supabase = await createClient();
   const periodo = getPeriodoMes(params.mes);
+  const page = Math.max(Number(params.page || 1), 1);
+  const from = (page - 1) * PAGE_SIZE;
+  const to = from + PAGE_SIZE - 1;
 
   let query = supabase
     .from("despesas")
-    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,status,categoria_id,bolso_id,anexo_path,anexo_nome,data_competencia,categorias(nome),bolsos(nome)", { count: "exact" })
     .eq("user_id", user.id)
     .gte("data_competencia", periodo.inicio)
     .lt("data_competencia", periodo.fim)
-    .order("data_competencia", { ascending: false });
+    .order("data_competencia", { ascending: false })
+    .range(from, to);
 
-  if (params.q) {
-    query = query.ilike("descricao", `%${params.q}%`);
-  }
+  if (params.q) query = query.ilike("descricao", `%${params.q}%`);
+  if (params.status) query = query.eq("status", params.status);
+  if (params.categoria) query = query.eq("categoria_id", params.categoria);
+  if (params.bolso) query = query.eq("bolso_id", params.bolso);
 
-  if (params.status) {
-    query = query.eq("status", params.status);
-  }
-
-  if (params.categoria) {
-    query = query.eq("categoria_id", params.categoria);
-  }
-
-  if (params.bolso) {
-    query = query.eq("bolso_id", params.bolso);
-  }
-
-  const { data: expenses, error } = await query.returns<Expense[]>();
+  const { count, data: expenses, error } = await query.returns<Expense[]>();
   const totalMes = await calcularTotalDespesas(user.id, periodo);
   const { data: monthExpenses } = await supabase.from("despesas").select("valor,status").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number; status: ExpenseStatus }>>();
-
   const totals = (monthExpenses || []).reduce(
     (acc, expense) => {
       const value = Number(expense.valor || 0);
-      if (expense.status === "pp") {
-        acc.paid += value;
-      } else {
-        acc.pending += value;
-      }
+      if (expense.status === "pp") acc.paid += value;
+      else acc.pending += value;
       return acc;
     },
     { paid: 0, pending: 0, total: totalMes }
   );
 
-  const attachments = await Promise.all(
-    (expenses || []).map(async (expense) => [expense.id, await getExpenseAttachmentUrl(expense.anexo_path)] as const)
-  );
+  const attachments = await Promise.all((expenses || []).map(async (expense) => [expense.id, await getExpenseAttachmentUrl(expense.anexo_path)] as const));
   const attachmentUrls = new Map(attachments);
 
   return (
@@ -90,55 +76,13 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
       <MonthFilter month={periodo.mes} />
 
       <div className="expense-summary-grid">
-        <Card className="summary-card" tone="expense">
-          <span>Pendentes</span>
-          <strong>{formatCurrency(totals.pending)}</strong>
-        </Card>
-        <Card className="summary-card" tone="income">
-          <span>Pagas</span>
-          <strong>{formatCurrency(totals.paid)}</strong>
-        </Card>
-        <Card className="summary-card" tone="cards">
-          <span>Total mês</span>
-          <strong>{formatCurrency(totals.total)}</strong>
-        </Card>
+        <Card className="summary-card" tone="expense"><span>Pendentes</span><strong>{formatCurrency(totals.pending)}</strong></Card>
+        <Card className="summary-card" tone="income"><span>Pagas</span><strong>{formatCurrency(totals.paid)}</strong></Card>
+        <Card className="summary-card" tone="cards"><span>Total mês</span><strong>{formatCurrency(totals.total)}</strong></Card>
       </div>
 
       <Card className="expense-filters-card">
-        <form className="expense-filters">
-          <label>
-            <span>Busca</span>
-            <input defaultValue={params.q || ""} name="q" placeholder="Buscar descrição" />
-          </label>
-          <label>
-            <span>Status</span>
-            <select defaultValue={params.status || ""} name="status">
-              <option value="">Todos</option>
-              {statusOptions.map((status) => (
-                <option key={status.value} value={status.value}>{status.label}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Categoria</span>
-            <select defaultValue={params.categoria || ""} name="categoria">
-              <option value="">Todas</option>
-              {(categories.data || []).map((category) => (
-                <option key={category.id} value={category.id}>{category.nome}</option>
-              ))}
-            </select>
-          </label>
-          <label>
-            <span>Bolso</span>
-            <select defaultValue={params.bolso || ""} name="bolso">
-              <option value="">Todos</option>
-              {(pockets.data || []).map((pocket) => (
-                <option key={pocket.id} value={pocket.id}>{pocket.nome}</option>
-              ))}
-            </select>
-          </label>
-          <Button type="submit">Filtrar</Button>
-        </form>
+        <FinancialFilters categories={categories.data || []} pockets={pockets.data || []} showStatus status={params.status || ""} />
       </Card>
 
       {error ? <p className="admin-alert">Não foi possível carregar despesas: {error.message}</p> : null}
@@ -158,11 +102,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
             </TableRow>
           </TableHead>
           <TableBody>
-            {(expenses || []).length === 0 ? (
-              <TableRow>
-                <TableCell className="empty-cell" colSpan={8}>Nenhuma despesa encontrada.</TableCell>
-              </TableRow>
-            ) : null}
+            {(expenses || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={8}>Nenhuma despesa encontrada.</TableCell></TableRow> : null}
             {(expenses || []).map((expense) => {
               const attachmentUrl = attachmentUrls.get(expense.id);
               return (
@@ -173,9 +113,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
                   <TableCell>{expense.categorias?.nome || "-"}</TableCell>
                   <TableCell>{expense.bolsos?.nome || "-"}</TableCell>
                   <TableCell>{formatCurrency(expense.valor)}</TableCell>
-                  <TableCell>
-                    {attachmentUrl ? <a className="attachment-link" href={attachmentUrl} rel="noreferrer" target="_blank">{expense.anexo_nome || "Abrir"}</a> : "-"}
-                  </TableCell>
+                  <TableCell>{attachmentUrl ? <a className="attachment-link" href={attachmentUrl} rel="noreferrer" target="_blank">{expense.anexo_nome || "Abrir"}</a> : "-"}</TableCell>
                   <TableCell>
                     <div className="table-actions">
                       <Link className="table-link-button" href={`/app/despesas/${expense.id}/editar`}>Editar</Link>
@@ -196,6 +134,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
           </TableBody>
         </Table>
       </TableWrap>
+      <Pagination page={page} pageSize={PAGE_SIZE} total={count || 0} params={{ bolso: params.bolso, categoria: params.categoria, mes: periodo.mes, q: params.q, status: params.status }} />
     </section>
   );
 }
