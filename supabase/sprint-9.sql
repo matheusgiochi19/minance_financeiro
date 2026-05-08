@@ -5,6 +5,34 @@
 
 create extension if not exists pgcrypto;
 
+do $$
+begin
+  if not exists (select 1 from pg_type where typname = 'app_role') then
+    create type public.app_role as enum ('user', 'master');
+  end if;
+end $$;
+
+create table if not exists public.profiles (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null unique references auth.users(id) on delete cascade,
+  email text,
+  role public.app_role not null default 'user',
+  ativo boolean not null default true,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.profiles
+add column if not exists email text,
+add column if not exists role public.app_role not null default 'user',
+add column if not exists ativo boolean not null default true,
+add column if not exists created_at timestamptz not null default now(),
+add column if not exists updated_at timestamptz not null default now();
+
+update public.profiles
+set ativo = true
+where ativo is null;
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
