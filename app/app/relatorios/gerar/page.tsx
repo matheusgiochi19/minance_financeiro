@@ -15,22 +15,22 @@ export default async function RelatorioGerarPage({ searchParams }: RelatorioGera
   const params = await searchParams;
   const { user } = await requireAuthenticatedUser();
   const supabase = await createClient();
-  const inicio = params.inicio ? new Date(params.inicio).toISOString() : "1970-01-01T00:00:00.000Z";
-  const fim = params.fim ? new Date(`${params.fim}T23:59:59`).toISOString() : new Date().toISOString();
+  const inicio = params.inicio || "1970-01-01";
+  const fim = params.fim || new Date().toISOString().slice(0, 10);
   const tipo = params.tipo || "todos";
   const rows: ReportRow[] = [];
 
   if (tipo === "todos" || tipo === "receitas") {
-    const { data } = await supabase.from("receitas").select("descricao,valor,created_at").eq("user_id", user.id).gte("created_at", inicio).lte("created_at", fim);
-    rows.push(...(data || []).map((item) => ({ data: item.created_at, descricao: item.descricao, tipo: "Receita", valor: Number(item.valor) })));
+    const { data } = await supabase.from("receitas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Receita", valor: Number(item.valor) })));
   }
   if (tipo === "todos" || tipo === "despesas") {
-    const { data } = await supabase.from("despesas").select("descricao,valor,created_at").eq("user_id", user.id).gte("created_at", inicio).lte("created_at", fim);
-    rows.push(...(data || []).map((item) => ({ data: item.created_at, descricao: item.descricao, tipo: "Despesa", valor: Number(item.valor) })));
+    const { data } = await supabase.from("despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Despesa", valor: Number(item.valor) })));
   }
   if (tipo === "todos" || tipo === "cartoes") {
-    const { data } = await supabase.from("cartao_despesas").select("descricao,valor,created_at").eq("user_id", user.id).gte("created_at", inicio).lte("created_at", fim);
-    rows.push(...(data || []).map((item) => ({ data: item.created_at, descricao: item.descricao, tipo: "Cartão", valor: Number(item.valor) })));
+    const { data } = await supabase.from("cartao_despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Cartão", valor: Number(item.valor) })));
   }
 
   rows.sort((a, b) => a.data.localeCompare(b.data));
@@ -46,7 +46,7 @@ export default async function RelatorioGerarPage({ searchParams }: RelatorioGera
         <Table>
           <TableHead><TableRow><TableHeader>Data</TableHeader><TableHeader>Tipo</TableHeader><TableHeader>Descrição</TableHeader><TableHeader>Valor</TableHeader></TableRow></TableHead>
           <TableBody>
-            {rows.map((row, index) => <TableRow key={`${row.tipo}-${index}`}><TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(row.data))}</TableCell><TableCell>{row.tipo}</TableCell><TableCell>{row.descricao}</TableCell><TableCell>{formatCurrency(row.valor)}</TableCell></TableRow>)}
+            {rows.map((row, index) => <TableRow key={`${row.tipo}-${index}`}><TableCell>{new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(row.data))}</TableCell><TableCell>{row.tipo}</TableCell><TableCell>{row.descricao}</TableCell><TableCell>{formatCurrency(row.valor)}</TableCell></TableRow>)}
             <TableRow><TableCell colSpan={3}><strong>Total</strong></TableCell><TableCell><strong>{formatCurrency(total)}</strong></TableCell></TableRow>
           </TableBody>
         </Table>

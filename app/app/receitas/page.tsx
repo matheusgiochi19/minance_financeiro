@@ -7,37 +7,32 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWra
 import { formatCurrency, listExpenseOptions } from "@/lib/expenses";
 import type { Receita } from "@/lib/income-cards";
 import { createClient } from "@/lib/supabase/server";
+import { MonthFilter } from "@/components/month-filter";
+import { calcularTotalReceitas, getPeriodoMes } from "@/services/finance.service";
 
 type ReceitasPageProps = {
-  searchParams: Promise<{ bolso?: string; categoria?: string; q?: string }>;
+  searchParams: Promise<{ bolso?: string; categoria?: string; mes?: string; q?: string }>;
 };
-
-function getMonthRange() {
-  const now = new Date();
-  return {
-    end: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
-    start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  };
-}
 
 export default async function ReceitasPage({ searchParams }: ReceitasPageProps) {
   const params = await searchParams;
   const { categories, pockets, user } = await listExpenseOptions();
   const supabase = await createClient();
+  const periodo = getPeriodoMes(params.mes);
   let query = supabase
     .from("receitas")
-    .select("id,descricao,valor,categoria_id,bolso_id,user_id,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,categoria_id,bolso_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .gte("data_competencia", periodo.inicio)
+    .lt("data_competencia", periodo.fim)
+    .order("data_competencia", { ascending: false });
 
   if (params.q) query = query.ilike("descricao", `%${params.q}%`);
   if (params.categoria) query = query.eq("categoria_id", params.categoria);
   if (params.bolso) query = query.eq("bolso_id", params.bolso);
 
   const { data: receitas, error } = await query.returns<Receita[]>();
-  const { start, end } = getMonthRange();
-  const { data: monthReceitas } = await supabase.from("receitas").select("valor").eq("user_id", user.id).gte("created_at", start).lt("created_at", end).returns<Array<{ valor: number }>>();
-  const totalMes = (monthReceitas || []).reduce((total, receita) => total + Number(receita.valor || 0), 0);
+  const totalMes = await calcularTotalReceitas(user.id, periodo);
 
   return (
     <section className="expenses-page">
@@ -49,6 +44,7 @@ export default async function ReceitasPage({ searchParams }: ReceitasPageProps) 
         </div>
         <Link className="primary-button" href="/app/receitas/nova">Nova receita</Link>
       </div>
+      <MonthFilter month={periodo.mes} />
 
       <div className="expense-summary-grid">
         <Card className="summary-card" tone="income">
@@ -79,7 +75,7 @@ export default async function ReceitasPage({ searchParams }: ReceitasPageProps) 
             {(receitas || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={6}>Nenhuma receita encontrada.</TableCell></TableRow> : null}
             {(receitas || []).map((receita) => (
               <TableRow key={receita.id}>
-                <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(receita.created_at))}</TableCell>
+                <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(`${receita.data_competencia}T00:00:00`))}</TableCell>
                 <TableCell><strong>{receita.descricao}</strong></TableCell>
                 <TableCell>{receita.categorias?.nome || "-"}</TableCell>
                 <TableCell>{receita.bolsos?.nome || "-"}</TableCell>

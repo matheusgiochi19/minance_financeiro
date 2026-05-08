@@ -1,29 +1,28 @@
 import Link from "next/link";
 import { deleteOrcamento } from "@/app/app/orcamento/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
+import { MonthFilter } from "@/components/month-filter";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
-import { formatCurrency } from "@/lib/expenses";
 import type { Orcamento } from "@/lib/budgets";
+import { formatCurrency } from "@/lib/expenses";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
+import { getPeriodoMes } from "@/services/finance.service";
 
-function getCurrentMonth() {
-  const now = new Date();
-  return {
-    end: new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString(),
-    start: new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-  };
-}
+type OrcamentoPageProps = {
+  searchParams: Promise<{ mes?: string }>;
+};
 
-export default async function OrcamentoPage() {
+export default async function OrcamentoPage({ searchParams }: OrcamentoPageProps) {
+  const filters = await searchParams;
+  const periodo = getPeriodoMes(filters.mes);
   const { user } = await requireAuthenticatedUser();
   const supabase = await createClient();
-  const { start, end } = getCurrentMonth();
   const [{ data: orcamentos, error }, { data: receitas }, { data: despesas }] = await Promise.all([
     supabase.from("orcamentos").select("id,categoria_id,percentual_renda,valor_limite,user_id,created_at,updated_at,categorias(nome)").eq("user_id", user.id).order("created_at", { ascending: false }).returns<Orcamento[]>(),
-    supabase.from("receitas").select("valor").eq("user_id", user.id).gte("created_at", start).lt("created_at", end).returns<Array<{ valor: number }>>(),
-    supabase.from("despesas").select("valor,categoria_id").eq("user_id", user.id).gte("created_at", start).lt("created_at", end).returns<Array<{ categoria_id: string | null; valor: number }>>()
+    supabase.from("receitas").select("valor").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>(),
+    supabase.from("despesas").select("valor,categoria_id").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ categoria_id: string | null; valor: number }>>()
   ]);
 
   const renda = (receitas || []).reduce((total, item) => total + Number(item.valor || 0), 0);
@@ -37,9 +36,14 @@ export default async function OrcamentoPage() {
   return (
     <section className="records-page">
       <div className="page-heading with-action">
-        <div><p>Planejamento</p><h1>Orçamento</h1><span>Distribua sua renda por categoria e acompanhe o consumo mensal.</span></div>
+        <div>
+          <p>Planejamento</p>
+          <h1>Orçamento</h1>
+          <span>Distribua sua renda por categoria e acompanhe o consumo mensal.</span>
+        </div>
         <Link className="primary-button" href="/app/orcamento/novo">Novo orçamento</Link>
       </div>
+      <MonthFilter month={periodo.mes} />
 
       <div className="expense-summary-grid">
         <Card className="summary-card" tone="income"><span>Renda mês</span><strong>{formatCurrency(renda)}</strong></Card>

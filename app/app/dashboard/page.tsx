@@ -1,6 +1,8 @@
 import { Card } from "@/components/ui/card";
+import { MonthFilter } from "@/components/month-filter";
 import { formatCurrency } from "@/lib/expenses";
 import { getDashboardData, type CategorySlice } from "@/lib/dashboard";
+import { getPeriodoMes } from "@/services/finance.service";
 
 const pieColors = ["#8b6df2", "#ff8384", "#47bad0", "#ffad61", "#4e7ff0", "#3c5d12"];
 
@@ -77,8 +79,12 @@ function LineChart({ labels, values }: { labels: string[]; values: number[] }) {
   );
 }
 
-export default async function DashboardPage() {
-  const data = await getDashboardData();
+type DashboardPageProps = { searchParams: Promise<{ mes?: string }> };
+
+export default async function DashboardPage({ searchParams }: DashboardPageProps) {
+  const params = await searchParams;
+  const periodo = getPeriodoMes(params.mes);
+  const data = await getDashboardData(periodo.mes);
   const maxBar = Math.max(...data.series.receitas, ...data.series.despesas, 1);
 
   return (
@@ -88,6 +94,7 @@ export default async function DashboardPage() {
         <h1>Minance</h1>
         <span>Visão consolidada entre mês passado, mês atual e próximos 4 meses.</span>
       </div>
+      <MonthFilter month={periodo.mes} />
 
       <div className="summary-grid">
         <Card className="summary-card" tone="muted"><span>Saldo Atual</span><strong>{data.formatted.saldo}</strong></Card>

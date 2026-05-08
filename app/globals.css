@@ -1071,6 +1071,38 @@ button {
   margin-bottom: 24px;
 }
 
+.month-filter {
+  align-items: end;
+  display: flex;
+  gap: 12px;
+  margin: -12px 0 24px;
+}
+
+.month-filter label {
+  display: grid;
+  gap: 8px;
+}
+
+.month-filter label span {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.month-filter input {
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 46px;
+  outline: none;
+  padding: 0 12px;
+}
+
+.month-filter input:focus {
+  border-color: var(--terracotta);
+  box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
+}
+
 .expense-filters-card {
   margin-bottom: 22px;
   padding: 18px;
@@ -1487,5 +1519,10 @@ button {
   .expense-summary-grid,
   .expense-filters {
     grid-template-columns: 1fr;
+  }
+
+  .month-filter {
+    align-items: stretch;
+    flex-direction: column;
   }
 }

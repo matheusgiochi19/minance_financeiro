@@ -8,6 +8,7 @@ export type Receita = {
   categoria_id: string | null;
   bolso_id: string | null;
   user_id: string;
+  data_competencia: string;
   created_at: string;
   updated_at: string;
   categorias: { nome: string } | null;
@@ -32,6 +33,7 @@ export type CartaoDespesa = {
   status: "p" | "pp" | "ab";
   categoria_id: string | null;
   user_id: string;
+  data_competencia: string;
   created_at: string;
   updated_at: string;
   categorias: { nome: string } | null;
@@ -47,7 +49,7 @@ export async function getUserReceita(id: string) {
   const { supabase, user } = await requireAuthenticatedUser();
   return supabase
     .from("receitas")
-    .select("id,descricao,valor,categoria_id,bolso_id,user_id,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,categoria_id,bolso_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle<Receita>();
@@ -67,7 +69,7 @@ export async function getUserCartaoDespesa(cartaoId: string, despesaId: string) 
   const { supabase, user } = await requireAuthenticatedUser();
   return supabase
     .from("cartao_despesas")
-    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,created_at,updated_at,categorias(nome)")
+    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,created_at,updated_at,categorias(nome)")
     .eq("id", despesaId)
     .eq("cartao_id", cartaoId)
     .eq("user_id", user.id)
@@ -83,8 +85,8 @@ export async function getCurrentInvoiceTotal(cartaoId: string) {
     .from("cartao_despesas")
     .select("valor")
     .eq("cartao_id", cartaoId)
-    .gte("created_at", start)
-    .lt("created_at", end)
+    .gte("data_competencia", start.slice(0, 10))
+    .lt("data_competencia", end.slice(0, 10))
     .returns<Array<{ valor: number }>>();
 
   return (data || []).reduce((total, item) => total + Number(item.valor || 0), 0);

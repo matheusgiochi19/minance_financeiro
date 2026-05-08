@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { parseCurrency } from "@/lib/expenses";
+import { getCompetenceDate, parseCurrency } from "@/lib/expenses";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 
 function optionalUuid(value: FormDataEntryValue | null) {
@@ -20,6 +20,7 @@ export async function createReceita(formData: FormData) {
   await supabase.rpc("create_receita", {
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_valor: valor
   });
@@ -38,6 +39,7 @@ export async function updateReceita(formData: FormData) {
   await supabase.rpc("update_receita", {
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_id: id,
     p_valor: valor

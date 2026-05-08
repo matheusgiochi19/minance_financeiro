@@ -13,6 +13,7 @@ type ReceitaFormProps = {
 };
 
 export function ReceitaForm({ action, categories, defaultReceita, pockets }: ReceitaFormProps) {
+  const defaultCompetence = defaultReceita?.data_competencia || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
   return (
     <Card className="entity-form-card expense-edit-card">
       <h2>Dados da receita</h2>
@@ -25,6 +26,10 @@ export function ReceitaForm({ action, categories, defaultReceita, pockets }: Rec
         <label>
           <span>Valor</span>
           <input defaultValue={defaultReceita ? formatCurrency(defaultReceita.valor).replace("R$", "").trim() : ""} inputMode="decimal" name="valor" placeholder="0,00" required />
+        </label>
+        <label>
+          <span>Competência</span>
+          <input defaultValue={defaultCompetence} name="data_competencia" type="date" required />
         </label>
         <label>
           <span>Categoria</span>

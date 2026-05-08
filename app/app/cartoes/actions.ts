@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { getExpenseStatus, parseCurrency } from "@/lib/expenses";
+import { getCompetenceDate, getExpenseStatus, parseCurrency } from "@/lib/expenses";
 import { randomCardColor } from "@/lib/income-cards";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 
@@ -16,12 +16,11 @@ export async function createCartao(formData: FormData) {
   const limite = parseCurrency(formData.get("limite"));
   if (!nome) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("cartoes").insert({
-    cor: randomCardColor(),
-    limite: limite > 0 ? limite : null,
-    nome,
-    user_id: user.id
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("create_cartao", {
+    p_cor: randomCardColor(),
+    p_limite: limite > 0 ? limite : null,
+    p_nome: nome
   });
   revalidatePath("/app/cartoes");
   redirect("/app/cartoes");
@@ -33,8 +32,8 @@ export async function updateCartao(formData: FormData) {
   const limite = parseCurrency(formData.get("limite"));
   if (!id || !nome) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("cartoes").update({ limite: limite > 0 ? limite : null, nome }).eq("id", id).eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("update_cartao", { p_id: id, p_limite: limite > 0 ? limite : null, p_nome: nome });
   revalidatePath("/app/cartoes");
   redirect("/app/cartoes");
 }
@@ -43,8 +42,8 @@ export async function deleteCartao(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("cartoes").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("delete_cartao", { p_id: id });
   revalidatePath("/app/cartoes");
 }
 
@@ -58,6 +57,7 @@ export async function createCartaoDespesa(formData: FormData) {
   await supabase.rpc("create_cartao_despesa", {
     p_cartao_id: cartaoId,
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
@@ -78,6 +78,7 @@ export async function updateCartaoDespesa(formData: FormData) {
   await supabase.rpc("update_cartao_despesa", {
     p_cartao_id: cartaoId,
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_id: id,
     p_status: getExpenseStatus(formData.get("status")),

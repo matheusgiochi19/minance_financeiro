@@ -1,6 +1,7 @@
 import { formatCurrency, type ExpenseStatus } from "@/lib/expenses";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
+import { calcularFaturaCartao, calcularSaldo, calcularTotalDespesas, calcularTotalReceitas, getPeriodoMes } from "@/services/finance.service";
 
 export type MonthPoint = {
   end: string;
@@ -24,37 +25,42 @@ export function getDashboardMonths(): MonthPoint[] {
     const startDate = new Date(now.getFullYear(), now.getMonth() + offset, 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + offset + 1, 1);
     return {
-      end: endDate.toISOString(),
+      end: endDate.toISOString().slice(0, 10),
       label: monthLabel(startDate),
-      start: startDate.toISOString()
+      start: startDate.toISOString().slice(0, 10)
     };
   });
 }
 
-export async function getDashboardData() {
+export async function getDashboardData(mes?: string) {
   const { user } = await requireAuthenticatedUser();
   const supabase = await createClient();
   const months = getDashboardMonths();
-  const current = months[1];
+  const current = getPeriodoMes(mes);
 
   const [receitas, despesas, faturas, categorias] = await Promise.all([
-    supabase.from("receitas").select("valor,created_at").eq("user_id", user.id).gte("created_at", months[0].start).lt("created_at", months[5].end).returns<Array<{ created_at: string; valor: number }>>(),
-    supabase.from("despesas").select("valor,status,created_at,categorias(nome)").eq("user_id", user.id).gte("created_at", months[0].start).lt("created_at", months[5].end).returns<Array<{ categorias: { nome: string } | null; created_at: string; status: ExpenseStatus; valor: number }>>(),
-    supabase.from("cartao_despesas").select("valor,created_at").eq("user_id", user.id).gte("created_at", months[0].start).lt("created_at", months[5].end).returns<Array<{ created_at: string; valor: number }>>(),
-    supabase.from("despesas").select("valor,categorias(nome)").eq("user_id", user.id).gte("created_at", current.start).lt("created_at", current.end).returns<Array<{ categorias: { nome: string } | null; valor: number }>>()
+    supabase.from("receitas").select("valor,data_competencia").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
+    supabase.from("despesas").select("valor,status,data_competencia,categorias(nome)").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ categorias: { nome: string } | null; data_competencia: string; status: ExpenseStatus; valor: number }>>(),
+    supabase.from("cartao_despesas").select("valor,data_competencia").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
+    supabase.from("despesas").select("valor,categorias(nome)").eq("user_id", user.id).gte("data_competencia", current.inicio).lt("data_competencia", current.fim).returns<Array<{ categorias: { nome: string } | null; valor: number }>>()
   ]);
 
-  const sumByMonth = (items: Array<{ created_at: string; valor: number }> | null | undefined) =>
+  const sumByMonth = (items: Array<{ data_competencia: string; valor: number }> | null | undefined) =>
     months.map((month) =>
       (items || [])
-        .filter((item) => item.created_at >= month.start && item.created_at < month.end)
+        .filter((item) => item.data_competencia >= month.start && item.data_competencia < month.end)
         .reduce((total, item) => total + Number(item.valor || 0), 0)
     );
 
   const receitasMes = sumByMonth(receitas.data);
   const despesasMes = sumByMonth(despesas.data);
   const faturasMes = sumByMonth(faturas.data);
-  const currentIndex = 1;
+  const [saldoReal, receitasReal, despesasReal, faturasReal] = await Promise.all([
+    calcularSaldo(user.id, current),
+    calcularTotalReceitas(user.id, current),
+    calcularTotalDespesas(user.id, current),
+    calcularFaturaCartao(user.id, current.mes)
+  ]);
   const categoryMap = new Map<string, number>();
 
   for (const item of categorias.data || []) {
@@ -64,17 +70,17 @@ export async function getDashboardData() {
 
   return {
     cards: {
-      despesas: despesasMes[currentIndex],
-      faturas: faturasMes[currentIndex],
-      receitas: receitasMes[currentIndex],
-      saldo: receitasMes[currentIndex] - despesasMes[currentIndex] - faturasMes[currentIndex]
+      despesas: despesasReal,
+      faturas: faturasReal,
+      receitas: receitasReal,
+      saldo: saldoReal
     },
     categories: Array.from(categoryMap, ([nome, valor]) => ({ nome, valor })),
     formatted: {
-      despesas: formatCurrency(despesasMes[currentIndex]),
-      faturas: formatCurrency(faturasMes[currentIndex]),
-      receitas: formatCurrency(receitasMes[currentIndex]),
-      saldo: formatCurrency(receitasMes[currentIndex] - despesasMes[currentIndex] - faturasMes[currentIndex])
+      despesas: formatCurrency(despesasReal),
+      faturas: formatCurrency(faturasReal),
+      receitas: formatCurrency(receitasReal),
+      saldo: formatCurrency(saldoReal)
     },
     months,
     series: {

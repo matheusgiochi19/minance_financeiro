@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { parseCurrency, getExpenseStatus } from "@/lib/expenses";
+import { getCompetenceDate, parseCurrency, getExpenseStatus } from "@/lib/expenses";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 
 const MAX_ATTACHMENT_SIZE = 50 * 1024 * 1024;
@@ -54,6 +54,7 @@ export async function createDespesa(formData: FormData) {
     p_anexo_path: attachment.path,
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
@@ -84,6 +85,7 @@ export async function updateDespesa(formData: FormData) {
     p_anexo_path: attachment.path,
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
+    p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_id: id,
     p_status: getExpenseStatus(formData.get("status")),

@@ -6,6 +6,8 @@ import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
 import { expenseStatusLabels, formatCurrency, getExpenseAttachmentUrl, listExpenseOptions, type Expense, type ExpenseStatus } from "@/lib/expenses";
 import { createClient } from "@/lib/supabase/server";
+import { MonthFilter } from "@/components/month-filter";
+import { calcularTotalDespesas, getPeriodoMes } from "@/services/finance.service";
 
 type DespesasPageProps = {
   searchParams: Promise<{
@@ -13,6 +15,7 @@ type DespesasPageProps = {
     categoria?: string;
     q?: string;
     status?: ExpenseStatus | "";
+    mes?: string;
   }>;
 };
 
@@ -22,24 +25,19 @@ const statusOptions: Array<{ label: string; value: ExpenseStatus }> = [
   { label: "Aberta", value: "ab" }
 ];
 
-function getMonthRange() {
-  const now = new Date();
-  const start = new Date(now.getFullYear(), now.getMonth(), 1);
-  const end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-
-  return { end: end.toISOString(), start: start.toISOString() };
-}
-
 export default async function DespesasPage({ searchParams }: DespesasPageProps) {
   const params = await searchParams;
   const { categories, pockets, user } = await listExpenseOptions();
   const supabase = await createClient();
+  const periodo = getPeriodoMes(params.mes);
 
   let query = supabase
     .from("despesas")
-    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+    .gte("data_competencia", periodo.inicio)
+    .lt("data_competencia", periodo.fim)
+    .order("data_competencia", { ascending: false });
 
   if (params.q) {
     query = query.ilike("descricao", `%${params.q}%`);
@@ -58,19 +56,12 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
   }
 
   const { data: expenses, error } = await query.returns<Expense[]>();
-  const { start, end } = getMonthRange();
-  const { data: monthExpenses } = await supabase
-    .from("despesas")
-    .select("valor,status")
-    .eq("user_id", user.id)
-    .gte("created_at", start)
-    .lt("created_at", end)
-    .returns<Array<{ valor: number; status: ExpenseStatus }>>();
+  const totalMes = await calcularTotalDespesas(user.id, periodo);
+  const { data: monthExpenses } = await supabase.from("despesas").select("valor,status").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number; status: ExpenseStatus }>>();
 
   const totals = (monthExpenses || []).reduce(
     (acc, expense) => {
       const value = Number(expense.valor || 0);
-      acc.total += value;
       if (expense.status === "pp") {
         acc.paid += value;
       } else {
@@ -78,7 +69,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
       }
       return acc;
     },
-    { paid: 0, pending: 0, total: 0 }
+    { paid: 0, pending: 0, total: totalMes }
   );
 
   const attachments = await Promise.all(
@@ -96,6 +87,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
         </div>
         <Link className="primary-button" href="/app/despesas/nova">Nova despesa</Link>
       </div>
+      <MonthFilter month={periodo.mes} />
 
       <div className="expense-summary-grid">
         <Card className="summary-card" tone="expense">
@@ -176,7 +168,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
               return (
                 <TableRow key={expense.id}>
                   <TableCell><span className={`status-pill expense-status-${expense.status}`}>{expenseStatusLabels[expense.status]}</span></TableCell>
-                  <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(expense.created_at))}</TableCell>
+                  <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(`${expense.data_competencia}T00:00:00`))}</TableCell>
                   <TableCell><strong>{expense.descricao}</strong></TableCell>
                   <TableCell>{expense.categorias?.nome || "-"}</TableCell>
                   <TableCell>{expense.bolsos?.nome || "-"}</TableCell>

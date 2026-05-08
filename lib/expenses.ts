@@ -18,6 +18,7 @@ export type Expense = {
   user_id: string;
   anexo_path: string | null;
   anexo_nome: string | null;
+  data_competencia: string;
   created_at: string;
   updated_at: string;
   categorias: { nome: string } | null;
@@ -52,6 +53,13 @@ export function getExpenseStatus(value: FormDataEntryValue | null): ExpenseStatu
   return value === "pp" || value === "ab" ? value : "p";
 }
 
+export function getCompetenceDate(value: FormDataEntryValue | null) {
+  const parsed = String(value || "");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(parsed)) return parsed;
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+}
+
 export async function listExpenseOptions() {
   const { supabase, user } = await requireAuthenticatedUser();
 
@@ -68,7 +76,7 @@ export async function getUserExpense(id: string) {
 
   return supabase
     .from("despesas")
-    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
     .maybeSingle<Expense>();

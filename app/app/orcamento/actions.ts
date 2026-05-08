@@ -12,12 +12,11 @@ export async function createOrcamento(formData: FormData) {
 
   if (!categoriaId || percentual < 0) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("orcamentos").insert({
-    categoria_id: categoriaId,
-    percentual_renda: percentual,
-    user_id: user.id,
-    valor_limite: valor > 0 ? valor : null
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("create_orcamento", {
+    p_categoria_id: categoriaId,
+    p_percentual_renda: percentual,
+    p_valor_limite: valor > 0 ? valor : null
   });
   revalidatePath("/app/orcamento");
   redirect("/app/orcamento");
@@ -31,16 +30,13 @@ export async function updateOrcamento(formData: FormData) {
 
   if (!id || !categoriaId || percentual < 0) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase
-    .from("orcamentos")
-    .update({
-      categoria_id: categoriaId,
-      percentual_renda: percentual,
-      valor_limite: valor > 0 ? valor : null
-    })
-    .eq("id", id)
-    .eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("update_orcamento", {
+    p_categoria_id: categoriaId,
+    p_id: id,
+    p_percentual_renda: percentual,
+    p_valor_limite: valor > 0 ? valor : null
+  });
   revalidatePath("/app/orcamento");
   redirect("/app/orcamento");
 }
@@ -49,7 +45,7 @@ export async function deleteOrcamento(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) return;
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("orcamentos").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await supabase.rpc("delete_orcamento", { p_id: id });
   revalidatePath("/app/orcamento");
 }

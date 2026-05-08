@@ -14,6 +14,7 @@ type ExpenseFormProps = {
 const statusOptions: ExpenseStatus[] = ["p", "pp", "ab"];
 
 export function ExpenseForm({ action, categories, defaultExpense, pockets, title }: ExpenseFormProps) {
+  const defaultCompetence = defaultExpense?.data_competencia || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10);
   return (
     <Card className="entity-form-card expense-edit-card">
       <h2>{title}</h2>
@@ -34,6 +35,10 @@ export function ExpenseForm({ action, categories, defaultExpense, pockets, title
               <option key={status} value={status}>{expenseStatusLabels[status]}</option>
             ))}
           </select>
+        </label>
+        <label>
+          <span>Competência</span>
+          <input defaultValue={defaultCompetence} name="data_competencia" type="date" required />
         </label>
         <label>
           <span>Categoria</span>
