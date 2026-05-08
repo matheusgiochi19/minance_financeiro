@@ -9,11 +9,12 @@ type AuthState = {
 };
 
 export async function signUp(_previousState: AuthState, formData: FormData): Promise<AuthState> {
+  const fullName = String(formData.get("full_name") || "").trim();
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
 
-  if (!email || !password) {
-    return { message: "Informe e-mail e senha." };
+  if (!fullName || !email || !password) {
+    return { message: "Informe nome completo, e-mail e senha." };
   }
 
   if (password.length < 6) {
@@ -21,16 +22,27 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      data: {
+        full_name: fullName
+      },
       emailRedirectTo: `${getSiteUrl()}/app/dashboard`
     }
   });
 
   if (error) {
     return { message: error.message };
+  }
+
+  if (data.user) {
+    await supabase.from("profiles").upsert({
+      email,
+      full_name: fullName,
+      user_id: data.user.id
+    }, { onConflict: "user_id" });
   }
 
   return { message: "Cadastro criado. Confirme seu e-mail antes de acessar o Minance." };

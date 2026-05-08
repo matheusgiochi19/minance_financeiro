@@ -11,6 +11,7 @@ type AuthFormProps = {
   footerHref: string;
   footerLabel: string;
   footerText: string;
+  includeFullName?: boolean;
   redirectTo?: string;
 };
 
@@ -24,6 +25,7 @@ export function AuthForm({
   footerHref,
   footerLabel,
   footerText,
+  includeFullName = false,
   redirectTo
 }: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(action, initialState);
@@ -31,6 +33,12 @@ export function AuthForm({
   return (
     <form action={formAction} className="auth-card">
       {redirectTo ? <input name="redirectTo" type="hidden" value={redirectTo} /> : null}
+      {includeFullName ? (
+        <label>
+          <span>Nome completo</span>
+          <input autoComplete="name" name="full_name" placeholder="Seu nome completo" required />
+        </label>
+      ) : null}
       <label>
         <span>E-mail</span>
         <input autoComplete="email" name="email" placeholder="seu@email.com" required type="email" />

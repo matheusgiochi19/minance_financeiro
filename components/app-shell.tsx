@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
   BarChart3,
   CircleDollarSign,
@@ -36,15 +36,18 @@ const baseNavItems = [
 ];
 
 type AppShellProps = {
-  children: React.ReactNode;
+  avatarUrl?: string | null;
+  children: ReactNode;
+  fullName?: string | null;
   role: AppRole;
-  userEmail?: string | null;
 };
 
-export function AppShell({ children, role, userEmail }: AppShellProps) {
+export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
   const navItems = role === "master" ? [...baseNavItems, { label: "Admin", icon: Shield, href: "/app/admin" }] : baseNavItems;
+  const displayName = fullName?.trim() || "Usuário";
+  const initial = displayName.slice(0, 1).toUpperCase();
 
   return (
     <div className={`app-frame ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -88,9 +91,9 @@ export function AppShell({ children, role, userEmail }: AppShellProps) {
           <Link aria-label="Configurações" className="icon-button" href="/app/configuracoes">
             <Settings size={20} />
           </Link>
-          <Link className="user-chip" href="/app/perfil" title={userEmail || "Usuário"}>
-            <div className="avatar">{userEmail?.slice(0, 1).toUpperCase() || "M"}</div>
-            <span>{userEmail || "Usuário"}</span>
+          <Link className="user-chip" href="/app/perfil" title={displayName}>
+            {avatarUrl ? <Image alt="" className="avatar avatar-image" height={42} src={avatarUrl} width={42} /> : <div className="avatar">{initial}</div>}
+            <span>{displayName}</span>
           </Link>
         </header>
         <main className="app-surface">{children}</main>

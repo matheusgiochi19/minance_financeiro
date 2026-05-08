@@ -22,7 +22,7 @@ export default async function ProtectedLayout({
   }
 
   return (
-    <AppShell role={profile?.role || "user"} userEmail={user.email}>
+    <AppShell avatarUrl={profile?.avatar_url} fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"}>
       {profile?.onboarding_hidden ? null : <OnboardingPanel />}
       {children}
     </AppShell>

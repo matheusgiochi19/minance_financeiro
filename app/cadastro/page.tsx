@@ -20,6 +20,7 @@ export default function CadastroPage() {
           footerHref="/login"
           footerLabel="Entrar"
           footerText="Ja tem conta?"
+          includeFullName
         />
       </section>
     </main>

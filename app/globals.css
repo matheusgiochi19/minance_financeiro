@@ -543,6 +543,10 @@ button {
   width: 42px;
 }
 
+.avatar-image {
+  object-fit: cover;
+}
+
 .user-chip {
   align-items: center;
   color: rgba(255, 255, 255, 0.88);
@@ -1458,6 +1462,28 @@ button {
   margin-bottom: 16px;
   object-fit: cover;
   width: 160px;
+}
+
+.profile-preview {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.profile-preview .profile-photo {
+  flex: 0 0 auto;
+  margin: 0;
+}
+
+.profile-photo-fallback {
+  align-items: center;
+  background: linear-gradient(135deg, #e7d9cc, #647187);
+  color: #fff;
+  display: flex;
+  font-size: 56px;
+  font-weight: 900;
+  justify-content: center;
 }
 
 .page-skeleton {

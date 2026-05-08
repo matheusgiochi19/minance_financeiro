@@ -19,7 +19,7 @@ export default async function AdminPage() {
   const supabase = await createClient();
   const { data: users, error } = await supabase
     .from("profiles")
-    .select("id,user_id,email,role,ativo,created_at,updated_at")
+    .select("id,user_id,email,full_name,avatar_url,role,ativo,foto_path,juros_atraso,onboarding_hidden,tema,created_at,updated_at")
     .order("created_at", { ascending: true })
     .returns<Profile[]>();
 

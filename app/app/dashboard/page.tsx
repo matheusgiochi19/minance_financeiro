@@ -2,6 +2,7 @@ import { DashboardCharts } from "@/components/dashboard-charts";
 import { MonthFilter } from "@/components/month-filter";
 import { Card } from "@/components/ui/card";
 import { getDashboardData } from "@/lib/dashboard";
+import { getCurrentProfile } from "@/lib/profiles";
 import { getPeriodoMes } from "@/services/finance.service";
 
 type DashboardPageProps = { searchParams: Promise<{ mes?: string }> };
@@ -9,13 +10,14 @@ type DashboardPageProps = { searchParams: Promise<{ mes?: string }> };
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const params = await searchParams;
   const periodo = getPeriodoMes(params.mes);
-  const data = await getDashboardData(periodo.mes);
+  const [data, { profile, user }] = await Promise.all([getDashboardData(periodo.mes), getCurrentProfile()]);
+  const displayName = profile?.full_name || user?.user_metadata?.full_name || "Minance";
 
   return (
     <section className="dashboard">
       <div className="welcome">
-        <p>Bem-vindo</p>
-        <h1>Minance</h1>
+        <p>Boas-vindas</p>
+        <h1>{displayName}</h1>
         <span>Visão consolidada entre mês passado, mês atual e próximos 4 meses.</span>
       </div>
       <MonthFilter month={periodo.mes} />
