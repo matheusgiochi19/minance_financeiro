@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   BarChart3,
   CircleDollarSign,
@@ -44,10 +44,21 @@ type AppShellProps = {
 
 export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
+  const [liveAvatarUrl, setLiveAvatarUrl] = useState<string | null>(null);
   const pathname = usePathname();
   const navItems = role === "master" ? [...baseNavItems, { label: "Admin", icon: Shield, href: "/app/admin" }] : baseNavItems;
   const displayName = fullName?.trim() || "Usuário";
   const initial = displayName.slice(0, 1).toUpperCase();
+
+  useEffect(() => {
+    const handleAvatarUpdate = (event: Event) => {
+      const customEvent = event as CustomEvent<{ avatarUrl?: string }>;
+      if (customEvent.detail?.avatarUrl) setLiveAvatarUrl(customEvent.detail.avatarUrl);
+    };
+    window.addEventListener("minance:avatar-updated", handleAvatarUpdate);
+    return () => window.removeEventListener("minance:avatar-updated", handleAvatarUpdate);
+  }, []);
+  const currentAvatarUrl = liveAvatarUrl || avatarUrl;
 
   return (
     <div className={`app-frame ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -92,7 +103,7 @@ export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps)
             <Settings size={20} />
           </Link>
           <Link className="user-chip" href="/app/perfil" title={displayName}>
-            {avatarUrl ? <Image alt="" className="avatar avatar-image" height={42} src={avatarUrl} width={42} /> : <div className="avatar">{initial}</div>}
+            {currentAvatarUrl ? <Image alt="" className="avatar avatar-image" height={42} src={currentAvatarUrl} width={42} /> : <div className="avatar">{initial}</div>}
             <span>{displayName}</span>
           </Link>
         </header>

@@ -1,5 +1,6 @@
 import Image from "next/image";
-import { updateEmail, updatePassword, updateProfile, uploadProfilePhoto } from "@/app/app/perfil/actions";
+import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
+import { AvatarUploadForm } from "@/components/avatar-upload-form";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { getCurrentProfile } from "@/lib/profiles";
@@ -34,11 +35,8 @@ export default async function PerfilPage() {
         </Card>
         <Card className="entity-form-card">
           <h2>Avatar</h2>
-          <p className="muted-copy">Use uma imagem de até 50MB. O arquivo fica salvo no Storage e o link persistido no perfil.</p>
-          <form action={uploadProfilePhoto} className="entity-form" encType="multipart/form-data">
-            <label><span>Imagem</span><input accept="image/*" name="foto" type="file" required /></label>
-            <FormSubmitButton pendingLabel="Enviando avatar...">Enviar avatar</FormSubmitButton>
-          </form>
+          <p className="muted-copy">Use JPG, PNG, WEBP ou GIF de até 50MB. O avatar atualiza na navegação assim que o upload termina.</p>
+          <AvatarUploadForm fallbackInitial={initial} initialAvatarUrl={profile?.avatar_url} />
         </Card>
       </div>
     </section>

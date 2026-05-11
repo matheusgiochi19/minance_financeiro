@@ -359,6 +359,11 @@ button {
   padding: 12px;
 }
 
+.form-message.success {
+  background: rgba(60, 93, 18, 0.14);
+  color: var(--green);
+}
+
 .auth-footer {
   color: #4a5364;
   margin: 0;
@@ -1485,6 +1490,11 @@ button {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+}
+
+.avatar-upload-panel {
+  display: grid;
+  gap: 16px;
 }
 
 .profile-preview .profile-photo {
