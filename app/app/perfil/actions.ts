@@ -85,10 +85,19 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
 
   const { data } = supabase.storage.from("avatars").getPublicUrl(path);
   const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
-  const { error: profileError } = await supabase.from("profiles").update({ avatar_url: avatarUrl, foto_path: path }).eq("user_id", user.id);
+  const { error: profileError } = await supabase.rpc("update_my_avatar", {
+    p_avatar_url: avatarUrl,
+    p_foto_path: path
+  });
 
   if (profileError) {
     return { message: `Imagem enviada, mas não foi possível salvar no perfil: ${profileError.message}`, ok: false };
+  }
+
+  const { data: savedProfile, error: readError } = await supabase.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle<{ avatar_url: string | null }>();
+
+  if (readError || savedProfile?.avatar_url !== avatarUrl) {
+    return { message: readError?.message || "Imagem enviada, mas o perfil não confirmou a persistência do avatar.", ok: false };
   }
 
   revalidatePath("/app", "layout");

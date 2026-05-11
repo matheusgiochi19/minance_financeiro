@@ -63,3 +63,21 @@ using (
   bucket_id = 'avatars'
   and (storage.foldername(name))[1] = auth.uid()::text
 );
+
+create or replace function public.update_my_avatar(p_avatar_url text, p_foto_path text)
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (user_id, email, avatar_url, foto_path)
+  values (auth.uid(), coalesce((auth.jwt() ->> 'email'), ''), p_avatar_url, p_foto_path)
+  on conflict (user_id) do update
+    set avatar_url = excluded.avatar_url,
+        foto_path = excluded.foto_path,
+        updated_at = now();
+end;
+$$;
+
+grant execute on function public.update_my_avatar(text, text) to authenticated;
