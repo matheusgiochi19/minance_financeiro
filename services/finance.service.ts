@@ -50,12 +50,12 @@ export const calcularFaturaCartao = cache(async (userId: string, mes: string) =>
   return Number(data || 0);
 });
 
-export const calcularSaldo = cache(async (userId: string, periodo: PeriodoFinanceiro) => {
-  const supabase = await createClient();
-  const { data } = await supabase.rpc("calcular_saldo", {
-    p_fim: periodo.fim,
-    p_inicio: periodo.inicio,
-    p_user_id: userId
-  });
-  return Number(data || 0);
+export const calcularSaldo = cache(async (userId: string, periodo: PeriodoFinanceiro & { mes?: string }) => {
+  const [receitas, despesas, faturas] = await Promise.all([
+    calcularTotalReceitas(userId, periodo),
+    calcularTotalDespesas(userId, periodo),
+    calcularFaturaCartao(userId, periodo.mes || getPeriodoMes().mes)
+  ]);
+
+  return receitas - despesas - faturas;
 });

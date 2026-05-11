@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { CurrencyInput } from "@/components/currency-input";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { expenseStatusLabels, formatCurrency, type Expense, type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
+import { expenseStatusLabels, type Expense, type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
 
 type ExpenseFormProps = {
   action: (formData: FormData) => Promise<void>;
@@ -26,7 +27,7 @@ export function ExpenseForm({ action, categories, defaultExpense, pockets, title
         </label>
         <label>
           <span>Valor</span>
-          <input defaultValue={defaultExpense ? formatCurrency(defaultExpense.valor).replace("R$", "").trim() : ""} inputMode="decimal" name="valor" placeholder="0,00" required />
+          <CurrencyInput defaultValue={defaultExpense?.valor} name="valor" required />
         </label>
         <label>
           <span>Status</span>

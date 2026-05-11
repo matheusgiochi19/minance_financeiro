@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
+import { parseCurrencyToNumber } from "@/utils/currency";
 
 export type ExpenseStatus = "p" | "pp" | "ab";
 
@@ -32,14 +33,7 @@ export const expenseStatusLabels: Record<ExpenseStatus, string> = {
 };
 
 export function parseCurrency(value: FormDataEntryValue | null) {
-  const normalized = String(value || "")
-    .replace(/\s/g, "")
-    .replace(/[R$]/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
-  const parsed = Number(normalized);
-
-  return Number.isFinite(parsed) ? parsed : 0;
+  return parseCurrencyToNumber(String(value || ""));
 }
 
 export function formatCurrency(value: number | string) {

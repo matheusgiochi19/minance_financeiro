@@ -62,8 +62,8 @@ export async function uploadProfilePhoto(formData: FormData) {
     upsert: true
   });
   if (error) return;
-  const { supabaseUrl } = getSupabaseConfig();
-  const avatarUrl = `${supabaseUrl}/storage/v1/object/public/avatars/${path}`;
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  const avatarUrl = data.publicUrl || `${getSupabaseConfig().supabaseUrl}/storage/v1/object/public/avatars/${path}`;
   await supabase.from("profiles").update({ avatar_url: avatarUrl, foto_path: path }).eq("user_id", user.id);
   revalidatePath("/app", "layout");
   revalidatePath("/app/perfil");

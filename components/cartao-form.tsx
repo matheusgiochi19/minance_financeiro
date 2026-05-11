@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { CurrencyInput } from "@/components/currency-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/expenses";
 import type { Cartao } from "@/lib/income-cards";
 
 type CartaoFormProps = {
@@ -21,7 +21,7 @@ export function CartaoForm({ action, defaultCartao }: CartaoFormProps) {
         </label>
         <label>
           <span>Limite</span>
-          <input defaultValue={defaultCartao?.limite ? formatCurrency(defaultCartao.limite).replace("R$", "").trim() : ""} inputMode="decimal" name="limite" placeholder="0,00" />
+          <CurrencyInput defaultValue={defaultCartao?.limite} name="limite" />
         </label>
         <div className="form-actions">
           <Button type="submit">Salvar</Button>

@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { CurrencyInput } from "@/components/currency-input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { formatCurrency, type ExpenseOption } from "@/lib/expenses";
+import { type ExpenseOption } from "@/lib/expenses";
 import type { Orcamento } from "@/lib/budgets";
 
 type OrcamentoFormProps = {
@@ -29,7 +30,7 @@ export function OrcamentoForm({ action, categories, defaultOrcamento }: Orcament
         </label>
         <label>
           <span>Valor limite manual</span>
-          <input defaultValue={defaultOrcamento?.valor_limite ? formatCurrency(defaultOrcamento.valor_limite).replace("R$", "").trim() : ""} inputMode="decimal" name="valor_limite" placeholder="Opcional" />
+          <CurrencyInput defaultValue={defaultOrcamento?.valor_limite} name="valor_limite" placeholder="Opcional" />
         </label>
         <div className="form-actions">
           <Button type="submit">Salvar</Button>

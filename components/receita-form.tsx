@@ -1,7 +1,7 @@
 import Link from "next/link";
+import { CurrencyInput } from "@/components/currency-input";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { formatCurrency } from "@/lib/expenses";
 import type { Receita } from "@/lib/income-cards";
 import type { ExpenseOption } from "@/lib/expenses";
 
@@ -25,7 +25,7 @@ export function ReceitaForm({ action, categories, defaultReceita, pockets }: Rec
         </label>
         <label>
           <span>Valor</span>
-          <input defaultValue={defaultReceita ? formatCurrency(defaultReceita.valor).replace("R$", "").trim() : ""} inputMode="decimal" name="valor" placeholder="0,00" required />
+          <CurrencyInput defaultValue={defaultReceita?.valor} name="valor" required />
         </label>
         <label>
           <span>Competência</span>
