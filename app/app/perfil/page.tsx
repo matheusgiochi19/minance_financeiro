@@ -3,12 +3,13 @@ import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/act
 import { AvatarUploadForm } from "@/components/avatar-upload-form";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { getCurrentProfile } from "@/lib/profiles";
+import { getAvatarDisplayUrl, getCurrentProfile } from "@/lib/profiles";
 
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
   const initial = (fullName || user?.email || "U").slice(0, 1).toUpperCase();
+  const avatarUrl = getAvatarDisplayUrl(profile);
 
   return (
     <section className="records-page">
@@ -17,7 +18,7 @@ export default async function PerfilPage() {
         <Card className="entity-form-card">
           <h2>Identidade</h2>
           <div className="profile-preview">
-            {profile?.avatar_url ? <Image alt="" className="profile-photo" height={160} src={profile.avatar_url} width={160} /> : <div className="profile-photo profile-photo-fallback">{initial}</div>}
+            {avatarUrl ? <Image alt="" className="profile-photo" height={160} src={avatarUrl} width={160} /> : <div className="profile-photo profile-photo-fallback">{initial}</div>}
             <strong>{fullName || "Seu nome"}</strong>
           </div>
           <form action={updateProfile} className="entity-form">
@@ -36,7 +37,7 @@ export default async function PerfilPage() {
         <Card className="entity-form-card">
           <h2>Avatar</h2>
           <p className="muted-copy">Use JPG, PNG, WEBP ou GIF de até 50MB. O avatar atualiza na navegação assim que o upload termina.</p>
-          <AvatarUploadForm fallbackInitial={initial} initialAvatarUrl={profile?.avatar_url} />
+          <AvatarUploadForm fallbackInitial={initial} initialAvatarUrl={avatarUrl} />
         </Card>
       </div>
     </section>

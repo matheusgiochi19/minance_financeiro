@@ -18,6 +18,12 @@ export type Profile = {
   updated_at: string;
 };
 
+export function getAvatarDisplayUrl(profile: Pick<Profile, "avatar_url" | "updated_at"> | null | undefined) {
+  if (!profile?.avatar_url) return null;
+  const separator = profile.avatar_url.includes("?") ? "&" : "?";
+  return `${profile.avatar_url}${separator}v=${encodeURIComponent(profile.updated_at)}`;
+}
+
 export async function getCurrentProfile() {
   const supabase = await createClient();
   const {

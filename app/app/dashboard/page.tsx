@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { DashboardCharts } from "@/components/dashboard-charts";
 import { MonthFilter } from "@/components/month-filter";
 import { Card } from "@/components/ui/card";
@@ -13,18 +12,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const periodo = getPeriodoMes(params.mes);
   const [data, { profile, user }] = await Promise.all([getDashboardData(periodo.mes), getCurrentProfile()]);
   const displayName = profile?.full_name || user?.user_metadata?.full_name || "Minance";
-  const initial = displayName.slice(0, 1).toUpperCase();
 
   return (
     <section className="dashboard">
       <div className="welcome">
-        <div className="dashboard-profile">
-          {profile?.avatar_url ? <Image alt="" className="avatar avatar-image" height={54} src={profile.avatar_url} width={54} /> : <div className="avatar dashboard-avatar">{initial}</div>}
-          <div>
-            <p>Boas-vindas</p>
-            <h1>{displayName}</h1>
-          </div>
-        </div>
+        <p>Boas-vindas</p>
+        <h1>{displayName}</h1>
         <span>Visão consolidada entre mês passado, mês atual e próximos 4 meses.</span>
       </div>
       <MonthFilter month={periodo.mes} />

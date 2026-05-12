@@ -5,6 +5,12 @@ import { createClient } from "@/lib/supabase/server";
 
 const MAX_PHOTO_SIZE = 50 * 1024 * 1024;
 const allowedImageTypes = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
+const imageExtensions: Record<string, string> = {
+  "image/gif": "gif",
+  "image/jpeg": "jpg",
+  "image/png": "png",
+  "image/webp": "webp"
+};
 
 export type AvatarUploadState = {
   avatarUrl?: string;
@@ -73,7 +79,15 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     return { message: "Sessão expirada. Faça login novamente.", ok: false };
   }
 
-  const path = `${user.id}/avatar-${Date.now()}.png`;
+  const extension = imageExtensions[file.type] || "png";
+  const path = `${user.id}/profile-avatar.${extension}`;
+  await supabase.storage.from("avatars").remove([
+    `${user.id}/profile-avatar.gif`,
+    `${user.id}/profile-avatar.jpg`,
+    `${user.id}/profile-avatar.png`,
+    `${user.id}/profile-avatar.webp`
+  ]);
+
   const { error } = await supabase.storage.from("avatars").upload(path, file, {
     contentType: file.type,
     upsert: true
@@ -84,7 +98,8 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
   }
 
   const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-  const avatarUrl = `${data.publicUrl}?t=${Date.now()}`;
+  const avatarUrl = data.publicUrl;
+  const displayAvatarUrl = `${avatarUrl}?v=${Date.now()}`;
   const { error: profileError } = await supabase.rpc("update_my_avatar", {
     p_avatar_url: avatarUrl,
     p_foto_path: path
@@ -102,5 +117,5 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
 
   revalidatePath("/app", "layout");
   revalidatePath("/app/perfil");
-  return { avatarUrl, message: "Foto atualizada com sucesso.", ok: true };
+  return { avatarUrl: displayAvatarUrl, message: "Foto atualizada com sucesso.", ok: true };
 }
