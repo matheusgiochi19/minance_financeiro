@@ -4,13 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 const MAX_PHOTO_SIZE = 50 * 1024 * 1024;
-const allowedImageTypes = new Set(["image/gif", "image/jpeg", "image/png", "image/webp"]);
-const imageExtensions: Record<string, string> = {
-  "image/gif": "gif",
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp"
-};
+const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
 
 export type AvatarUploadState = {
   avatarUrl?: string;
@@ -68,7 +62,7 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
   }
 
   if (!allowedImageTypes.has(file.type)) {
-    return { message: "Formato inválido. Envie JPG, PNG, WEBP ou GIF.", ok: false };
+    return { message: "Formato inválido. Envie JPG, PNG ou WEBP.", ok: false };
   }
 
   const supabase = await createClient();
@@ -79,8 +73,7 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     return { message: "Sessão expirada. Faça login novamente.", ok: false };
   }
 
-  const extension = imageExtensions[file.type] || "png";
-  const path = `${user.id}/profile-avatar.${extension}`;
+  const path = `${user.id}/avatar-profile`;
   await supabase.storage.from("avatars").remove([
     `${user.id}/profile-avatar.gif`,
     `${user.id}/profile-avatar.jpg`,

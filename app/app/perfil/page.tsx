@@ -36,7 +36,7 @@ export default async function PerfilPage() {
         </Card>
         <Card className="entity-form-card">
           <h2>Avatar</h2>
-          <p className="muted-copy">Use JPG, PNG, WEBP ou GIF de até 50MB. O avatar atualiza na navegação assim que o upload termina.</p>
+          <p className="muted-copy">Use JPG, PNG ou WEBP de até 50MB. O avatar atualiza na navegação assim que o upload termina.</p>
           <AvatarUploadForm fallbackInitial={initial} initialAvatarUrl={avatarUrl} />
         </Card>
       </div>

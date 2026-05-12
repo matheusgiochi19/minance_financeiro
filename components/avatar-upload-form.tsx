@@ -35,7 +35,7 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
         <label>
           <span>Imagem</span>
           <input
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/jpeg,image/png,image/webp"
             disabled={isPending}
             name="foto"
             type="file"
