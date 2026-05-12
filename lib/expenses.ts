@@ -58,8 +58,8 @@ export async function listExpenseOptions() {
   const { supabase, user } = await requireAuthenticatedUser();
 
   const [categories, pockets] = await Promise.all([
-    supabase.from("categorias").select("id,nome").eq("user_id", user.id).order("nome", { ascending: true }).returns<ExpenseOption[]>(),
-    supabase.from("bolsos").select("id,nome").eq("user_id", user.id).order("nome", { ascending: true }).returns<ExpenseOption[]>()
+    supabase.from("categorias").select("id,nome").eq("user_id", user.id).is("deleted_at", null).order("nome", { ascending: true }).returns<ExpenseOption[]>(),
+    supabase.from("bolsos").select("id,nome").eq("user_id", user.id).is("deleted_at", null).order("nome", { ascending: true }).returns<ExpenseOption[]>()
   ]);
 
   return { categories, pockets, user };
@@ -73,6 +73,7 @@ export async function getUserExpense(id: string) {
     .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle<Expense>();
 }
 

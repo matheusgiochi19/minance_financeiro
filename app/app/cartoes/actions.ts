@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { getCompetenceDate, getExpenseStatus, parseCurrency } from "@/lib/expenses";
 import { randomCardColor } from "@/lib/income-cards";
 import { requireAuthenticatedUser } from "@/lib/user-data";
+import { withTransactionRetry } from "@/services/transaction.service";
 
 function optionalUuid(value: FormDataEntryValue | null) {
   const parsed = String(value || "");
@@ -17,11 +18,11 @@ export async function createCartao(formData: FormData) {
   if (!nome) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("create_cartao", {
+  await withTransactionRetry(() => supabase.rpc("create_cartao", {
     p_cor: randomCardColor(),
     p_limite: limite > 0 ? limite : null,
     p_nome: nome
-  });
+  }));
   revalidatePath("/app/cartoes");
   redirect("/app/cartoes");
 }
@@ -33,7 +34,7 @@ export async function updateCartao(formData: FormData) {
   if (!id || !nome) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("update_cartao", { p_id: id, p_limite: limite > 0 ? limite : null, p_nome: nome });
+  await withTransactionRetry(() => supabase.rpc("update_cartao", { p_id: id, p_limite: limite > 0 ? limite : null, p_nome: nome }));
   revalidatePath("/app/cartoes");
   redirect("/app/cartoes");
 }
@@ -43,7 +44,7 @@ export async function deleteCartao(formData: FormData) {
   if (!id) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("delete_cartao", { p_id: id });
+  await withTransactionRetry(() => supabase.rpc("delete_cartao", { p_id: id }));
   revalidatePath("/app/cartoes");
 }
 
@@ -54,14 +55,14 @@ export async function createCartaoDespesa(formData: FormData) {
   if (!cartaoId || !descricao || valor <= 0) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("create_cartao_despesa", {
+  await withTransactionRetry(() => supabase.rpc("create_cartao_despesa", {
     p_cartao_id: cartaoId,
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
     p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
     p_descricao: descricao,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
-  });
+  }));
   revalidatePath(`/app/cartoes/${cartaoId}/despesas`);
   revalidatePath("/app/cartoes");
   redirect(`/app/cartoes/${cartaoId}/despesas`);
@@ -75,7 +76,7 @@ export async function updateCartaoDespesa(formData: FormData) {
   if (!id || !cartaoId || !descricao || valor <= 0) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("update_cartao_despesa", {
+  await withTransactionRetry(() => supabase.rpc("update_cartao_despesa", {
     p_cartao_id: cartaoId,
     p_categoria_id: optionalUuid(formData.get("categoria_id")),
     p_data_competencia: getCompetenceDate(formData.get("data_competencia")),
@@ -83,7 +84,7 @@ export async function updateCartaoDespesa(formData: FormData) {
     p_id: id,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
-  });
+  }));
   revalidatePath(`/app/cartoes/${cartaoId}/despesas`);
   revalidatePath("/app/cartoes");
   redirect(`/app/cartoes/${cartaoId}/despesas`);
@@ -95,7 +96,7 @@ export async function deleteCartaoDespesa(formData: FormData) {
   if (!id || !cartaoId) return;
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("delete_cartao_despesa", { p_cartao_id: cartaoId, p_id: id });
+  await withTransactionRetry(() => supabase.rpc("delete_cartao_despesa", { p_cartao_id: cartaoId, p_id: id }));
   revalidatePath(`/app/cartoes/${cartaoId}/despesas`);
   revalidatePath("/app/cartoes");
 }

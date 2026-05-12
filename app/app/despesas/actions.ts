@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCompetenceDate, parseCurrency, getExpenseStatus } from "@/lib/expenses";
 import { requireAuthenticatedUser } from "@/lib/user-data";
+import { withTransactionRetry } from "@/services/transaction.service";
 
 const MAX_ATTACHMENT_SIZE = 50 * 1024 * 1024;
 
@@ -49,7 +50,7 @@ export async function createDespesa(formData: FormData) {
   const { supabase, user } = await requireAuthenticatedUser();
   const attachment = await uploadAttachment(formData, user.id);
 
-  const { error } = await supabase.rpc("create_despesa", {
+  const { error } = await withTransactionRetry(() => supabase.rpc("create_despesa", {
     p_anexo_nome: attachment.name,
     p_anexo_path: attachment.path,
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
@@ -58,7 +59,7 @@ export async function createDespesa(formData: FormData) {
     p_descricao: descricao,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
-  });
+  }));
 
   if (error && attachment.path) {
     await supabase.storage.from("despesas-anexos").remove([attachment.path]);
@@ -80,7 +81,7 @@ export async function updateDespesa(formData: FormData) {
   const { supabase, user } = await requireAuthenticatedUser();
   const attachment = await uploadAttachment(formData, user.id);
 
-  const { error } = await supabase.rpc("update_despesa", {
+  const { error } = await withTransactionRetry(() => supabase.rpc("update_despesa", {
     p_anexo_nome: attachment.name,
     p_anexo_path: attachment.path,
     p_bolso_id: optionalUuid(formData.get("bolso_id")),
@@ -90,7 +91,7 @@ export async function updateDespesa(formData: FormData) {
     p_id: id,
     p_status: getExpenseStatus(formData.get("status")),
     p_valor: valor
-  });
+  }));
 
   if (error && attachment.path) {
     await supabase.storage.from("despesas-anexos").remove([attachment.path]);
@@ -109,7 +110,7 @@ export async function deleteDespesa(formData: FormData) {
   }
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("delete_despesa", { p_id: id });
+  await withTransactionRetry(() => supabase.rpc("delete_despesa", { p_id: id }));
 
   if (anexoPath) {
     await supabase.storage.from("despesas-anexos").remove([anexoPath]);
@@ -126,6 +127,6 @@ export async function markDespesaAsPaid(formData: FormData) {
   }
 
   const { supabase } = await requireAuthenticatedUser();
-  await supabase.rpc("mark_despesa_paid", { p_id: id });
+  await withTransactionRetry(() => supabase.rpc("mark_despesa_paid", { p_id: id }));
   revalidatePath("/app/despesas");
 }

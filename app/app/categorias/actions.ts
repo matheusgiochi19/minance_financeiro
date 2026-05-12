@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { normalizeName, requireAuthenticatedUser } from "@/lib/user-data";
+import { withTransactionRetry } from "@/services/transaction.service";
 
 export async function createCategoria(formData: FormData) {
   const nome = normalizeName(formData);
@@ -11,8 +12,8 @@ export async function createCategoria(formData: FormData) {
     return;
   }
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("categorias").insert({ nome, user_id: user.id });
+  const { supabase } = await requireAuthenticatedUser();
+  await withTransactionRetry(() => supabase.rpc("create_categoria", { p_nome: nome }));
   revalidatePath("/app/categorias");
   redirect("/app/categorias");
 }
@@ -25,8 +26,8 @@ export async function updateCategoria(formData: FormData) {
     return;
   }
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("categorias").update({ nome }).eq("id", id).eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await withTransactionRetry(() => supabase.rpc("update_categoria", { p_id: id, p_nome: nome }));
   revalidatePath("/app/categorias");
   redirect("/app/categorias");
 }
@@ -38,7 +39,7 @@ export async function deleteCategoria(formData: FormData) {
     return;
   }
 
-  const { supabase, user } = await requireAuthenticatedUser();
-  await supabase.from("categorias").delete().eq("id", id).eq("user_id", user.id);
+  const { supabase } = await requireAuthenticatedUser();
+  await withTransactionRetry(() => supabase.rpc("delete_categoria", { p_id: id }));
   revalidatePath("/app/categorias");
 }

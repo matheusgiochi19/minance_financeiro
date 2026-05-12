@@ -44,21 +44,31 @@ type AppShellProps = {
 
 export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [liveAvatarUrl, setLiveAvatarUrl] = useState<string | null>(null);
+  const [profileAvatarUrl, setProfileAvatarUrl] = useState<string | null>(avatarUrl || null);
+  const [profileName, setProfileName] = useState<string | null>(fullName || null);
   const pathname = usePathname();
   const navItems = role === "master" ? [...baseNavItems, { label: "Admin", icon: Shield, href: "/app/admin" }] : baseNavItems;
-  const displayName = fullName?.trim() || "Usuário";
+  const displayName = profileName?.trim() || "Usuário";
   const initial = displayName.slice(0, 1).toUpperCase();
 
   useEffect(() => {
-    const handleAvatarUpdate = (event: Event) => {
-      const customEvent = event as CustomEvent<{ avatarUrl?: string }>;
-      if (customEvent.detail?.avatarUrl) setLiveAvatarUrl(customEvent.detail.avatarUrl);
+    let active = true;
+
+    const hydrateProfile = async () => {
+      const response = await fetch("/app/api/profile", { cache: "no-store" });
+      if (!response.ok || !active) return;
+      const profile = (await response.json()) as { avatarUrl: string | null; fullName: string | null };
+      setProfileAvatarUrl(profile.avatarUrl);
+      setProfileName(profile.fullName);
     };
-    window.addEventListener("minance:avatar-updated", handleAvatarUpdate);
-    return () => window.removeEventListener("minance:avatar-updated", handleAvatarUpdate);
+
+    hydrateProfile().catch(() => undefined);
+    window.addEventListener("minance:profile-refresh", hydrateProfile);
+    return () => {
+      active = false;
+      window.removeEventListener("minance:profile-refresh", hydrateProfile);
+    };
   }, []);
-  const currentAvatarUrl = liveAvatarUrl || avatarUrl;
 
   return (
     <div className={`app-frame ${collapsed ? "sidebar-collapsed" : ""}`}>
@@ -103,7 +113,7 @@ export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps)
             <Settings size={20} />
           </Link>
           <Link className="user-chip" href="/app/perfil" title={displayName}>
-            {currentAvatarUrl ? <Image alt="" className="avatar avatar-image" height={42} src={currentAvatarUrl} width={42} /> : <div className="avatar">{initial}</div>}
+            {profileAvatarUrl ? <Image alt="" className="avatar avatar-image" height={42} src={profileAvatarUrl} width={42} /> : <div className="avatar">{initial}</div>}
             <span>{displayName}</span>
           </Link>
         </header>

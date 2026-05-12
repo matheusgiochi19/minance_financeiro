@@ -25,12 +25,13 @@ export default async function CartoesPage({ searchParams }: CartoesPageProps) {
     .from("cartoes")
     .select("id,nome,limite,cor", { count: "exact" })
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false })
     .range(from, to)
     .returns<Cartao[]>();
   const invoicePairs = await Promise.all(
     (cartoes || []).map(async (cartao) => {
-      const { data } = await supabase.from("cartao_despesas").select("valor").eq("user_id", user.id).eq("cartao_id", cartao.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
+      const { data } = await supabase.from("cartao_despesas").select("valor").eq("user_id", user.id).eq("cartao_id", cartao.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
       return [cartao.id, (data || []).reduce((total, item) => total + Number(item.valor || 0), 0)] as const;
     })
   );

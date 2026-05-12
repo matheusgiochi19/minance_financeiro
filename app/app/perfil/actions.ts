@@ -93,6 +93,11 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
   const { data } = supabase.storage.from("avatars").getPublicUrl(path);
   const avatarUrl = data.publicUrl;
   const displayAvatarUrl = `${avatarUrl}?v=${Date.now()}`;
+
+  if (!avatarUrl.includes("/storage/v1/object/public/avatars/") || avatarUrl.startsWith("blob:") || avatarUrl.includes("localhost")) {
+    return { message: "Storage retornou uma URL invalida para persistencia do avatar.", ok: false };
+  }
+
   const { error: profileError } = await supabase.rpc("update_my_avatar", {
     p_avatar_url: avatarUrl,
     p_foto_path: path
@@ -102,7 +107,23 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     return { message: `Imagem enviada, mas não foi possível salvar no perfil: ${profileError.message}`, ok: false };
   }
 
-  const { data: savedProfile, error: readError } = await supabase.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle<{ avatar_url: string | null }>();
+  const { data: storedFiles, error: storageReadError } = await supabase.storage.from("avatars").list(user.id, { search: "avatar-profile" });
+  if (storageReadError || !storedFiles?.some((item) => item.name === "avatar-profile")) {
+    return { message: storageReadError?.message || "Imagem enviada, mas o arquivo nao foi confirmado no bucket avatars.", ok: false };
+  }
+
+  const { data: savedProfile, error: readError } = await supabase
+    .from("profiles")
+    .select("avatar_url,updated_at")
+    .eq("user_id", user.id)
+    .maybeSingle<{ avatar_url: string | null; updated_at: string | null }>();
+
+  console.info("[avatar-upload]", {
+    avatarPersisted: savedProfile?.avatar_url === avatarUrl,
+    filePath: path,
+    hasUpdatedAt: Boolean(savedProfile?.updated_at),
+    userId: user.id
+  });
 
   if (readError || savedProfile?.avatar_url !== avatarUrl) {
     return { message: readError?.message || "Imagem enviada, mas o perfil não confirmou a persistência do avatar.", ok: false };

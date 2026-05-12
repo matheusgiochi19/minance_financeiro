@@ -21,15 +21,15 @@ export default async function RelatorioGerarPage({ searchParams }: RelatorioGera
   const rows: ReportRow[] = [];
 
   if (tipo === "todos" || tipo === "receitas") {
-    const { data } = await supabase.from("receitas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    const { data } = await supabase.from("receitas").select("descricao,valor,data_competencia").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", inicio).lte("data_competencia", fim);
     rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Receita", valor: Number(item.valor) })));
   }
   if (tipo === "todos" || tipo === "despesas") {
-    const { data } = await supabase.from("despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    const { data } = await supabase.from("despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", inicio).lte("data_competencia", fim);
     rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Despesa", valor: Number(item.valor) })));
   }
   if (tipo === "todos" || tipo === "cartoes") {
-    const { data } = await supabase.from("cartao_despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).gte("data_competencia", inicio).lte("data_competencia", fim);
+    const { data } = await supabase.from("cartao_despesas").select("descricao,valor,data_competencia").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", inicio).lte("data_competencia", fim);
     rows.push(...(data || []).map((item) => ({ data: item.data_competencia, descricao: item.descricao, tipo: "Cartão", valor: Number(item.valor) })));
   }
 

@@ -19,7 +19,11 @@ export async function GET() {
   const parts: string[] = [];
 
   for (const table of tables) {
-    const { data } = await supabase.from(table).select("*").eq("user_id", user.id);
+    let query = supabase.from(table).select("*").eq("user_id", user.id);
+    if (["categorias", "bolsos", "receitas", "despesas", "cartoes", "cartao_despesas"].includes(table)) {
+      query = query.is("deleted_at", null);
+    }
+    const { data } = await query;
     parts.push(`# ${table}`);
     if (data?.length) {
       const headers = Object.keys(data[0]);

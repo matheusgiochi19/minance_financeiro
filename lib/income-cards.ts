@@ -52,6 +52,7 @@ export async function getUserReceita(id: string) {
     .select("id,descricao,valor,categoria_id,bolso_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle<Receita>();
 }
 
@@ -62,6 +63,7 @@ export async function getUserCartao(id: string) {
     .select("id,nome,limite,cor,user_id,created_at,updated_at")
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle<Cartao>();
 }
 
@@ -73,6 +75,7 @@ export async function getUserCartaoDespesa(cartaoId: string, despesaId: string) 
     .eq("id", despesaId)
     .eq("cartao_id", cartaoId)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle<CartaoDespesa>();
 }
 
@@ -85,6 +88,7 @@ export async function getCurrentInvoiceTotal(cartaoId: string) {
     .from("cartao_despesas")
     .select("valor")
     .eq("cartao_id", cartaoId)
+    .is("deleted_at", null)
     .gte("data_competencia", start.slice(0, 10))
     .lt("data_competencia", end.slice(0, 10))
     .returns<Array<{ valor: number }>>();

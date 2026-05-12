@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { uploadProfilePhoto, type AvatarUploadState } from "@/app/app/perfil/actions";
@@ -19,14 +20,16 @@ const initialState: AvatarUploadState = {
 export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUploadFormProps) {
   const [state, formAction, isPending] = useActionState(uploadProfilePhoto, initialState);
   const [previewUrl, setPreviewUrl] = useState<string | null>(initialAvatarUrl || null);
+  const router = useRouter();
   const displayUrl = state.avatarUrl || previewUrl;
 
   const feedbackClass = useMemo(() => (state.ok ? "form-message success" : "form-message"), [state.ok]);
 
   useEffect(() => {
-    if (!state.ok || !state.avatarUrl) return;
-    window.dispatchEvent(new CustomEvent("minance:avatar-updated", { detail: { avatarUrl: state.avatarUrl } }));
-  }, [state.avatarUrl, state.ok]);
+    if (!state.ok) return;
+    window.dispatchEvent(new CustomEvent("minance:profile-refresh"));
+    router.refresh();
+  }, [router, state.ok]);
 
   return (
     <div className="avatar-upload-panel">

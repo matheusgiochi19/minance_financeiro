@@ -37,6 +37,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
     .from("despesas")
     .select("id,descricao,valor,status,categoria_id,bolso_id,anexo_path,anexo_nome,data_competencia,categorias(nome),bolsos(nome)", { count: "exact" })
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .gte("data_competencia", periodo.inicio)
     .lt("data_competencia", periodo.fim)
     .order("data_competencia", { ascending: false })
@@ -49,7 +50,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
 
   const { count, data: expenses, error } = await query.returns<Expense[]>();
   const totalMes = await calcularTotalDespesas(user.id, periodo);
-  const { data: monthExpenses } = await supabase.from("despesas").select("valor,status").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number; status: ExpenseStatus }>>();
+  const { data: monthExpenses } = await supabase.from("despesas").select("valor,status").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number; status: ExpenseStatus }>>();
   const totals = (monthExpenses || []).reduce(
     (acc, expense) => {
       const value = Number(expense.valor || 0);

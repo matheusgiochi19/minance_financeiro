@@ -21,8 +21,8 @@ export default async function OrcamentoPage({ searchParams }: OrcamentoPageProps
   const supabase = await createClient();
   const [{ data: orcamentos, error }, { data: receitas }, { data: despesas }] = await Promise.all([
     supabase.from("orcamentos").select("id,categoria_id,percentual_renda,valor_limite,user_id,created_at,updated_at,categorias(nome)").eq("user_id", user.id).order("created_at", { ascending: false }).returns<Orcamento[]>(),
-    supabase.from("receitas").select("valor").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>(),
-    supabase.from("despesas").select("valor,categoria_id").eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ categoria_id: string | null; valor: number }>>()
+    supabase.from("receitas").select("valor").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>(),
+    supabase.from("despesas").select("valor,categoria_id").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ categoria_id: string | null; valor: number }>>()
   ]);
 
   const renda = (receitas || []).reduce((total, item) => total + Number(item.valor || 0), 0);

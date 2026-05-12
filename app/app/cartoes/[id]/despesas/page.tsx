@@ -35,13 +35,14 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
     .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,categorias(nome)", { count: "exact" })
     .eq("cartao_id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .gte("data_competencia", periodo.inicio)
     .lt("data_competencia", periodo.fim)
     .order("data_competencia", { ascending: false })
     .range(from, to)
     .returns<CartaoDespesa[]>();
 
-  const { data: fatura } = await supabase.from("cartao_despesas").select("valor").eq("cartao_id", id).eq("user_id", user.id).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
+  const { data: fatura } = await supabase.from("cartao_despesas").select("valor").eq("cartao_id", id).eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
   const totalFatura = (fatura || []).reduce((total, despesa) => total + Number(despesa.valor || 0), 0);
 
   return (

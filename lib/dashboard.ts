@@ -39,10 +39,10 @@ export async function getDashboardData(mes?: string) {
   const current = getPeriodoMes(mes);
 
   const [receitas, despesas, faturas, categorias] = await Promise.all([
-    supabase.from("receitas").select("valor,data_competencia").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
-    supabase.from("despesas").select("valor,status,data_competencia,categorias(nome)").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ categorias: { nome: string } | null; data_competencia: string; status: ExpenseStatus; valor: number }>>(),
-    supabase.from("cartao_despesas").select("valor,data_competencia").eq("user_id", user.id).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
-    supabase.from("despesas").select("valor,categorias(nome)").eq("user_id", user.id).gte("data_competencia", current.inicio).lt("data_competencia", current.fim).returns<Array<{ categorias: { nome: string } | null; valor: number }>>()
+    supabase.from("receitas").select("valor,data_competencia").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
+    supabase.from("despesas").select("valor,status,data_competencia,categorias(nome)").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ categorias: { nome: string } | null; data_competencia: string; status: ExpenseStatus; valor: number }>>(),
+    supabase.from("cartao_despesas").select("valor,data_competencia").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", months[0].start).lt("data_competencia", months[5].end).returns<Array<{ data_competencia: string; valor: number }>>(),
+    supabase.from("despesas").select("valor,categorias(nome)").eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", current.inicio).lt("data_competencia", current.fim).returns<Array<{ categorias: { nome: string } | null; valor: number }>>()
   ]);
 
   const sumByMonth = (items: Array<{ data_competencia: string; valor: number }> | null | undefined) =>

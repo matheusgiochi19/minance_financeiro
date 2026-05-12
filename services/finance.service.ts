@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { calcularSaldoLedger } from "@/services/ledger.service";
 
 export type PeriodoFinanceiro = {
   fim: string;
@@ -51,11 +52,5 @@ export const calcularFaturaCartao = cache(async (userId: string, mes: string) =>
 });
 
 export const calcularSaldo = cache(async (userId: string, periodo: PeriodoFinanceiro & { mes?: string }) => {
-  const [receitas, despesas, faturas] = await Promise.all([
-    calcularTotalReceitas(userId, periodo),
-    calcularTotalDespesas(userId, periodo),
-    calcularFaturaCartao(userId, periodo.mes || getPeriodoMes().mes)
-  ]);
-
-  return receitas - despesas - faturas;
+  return calcularSaldoLedger(userId, periodo);
 });

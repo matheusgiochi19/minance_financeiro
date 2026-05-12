@@ -31,6 +31,7 @@ export async function listUserRecords(table: UserTableName) {
     .from(table)
     .select("id,nome,user_id,created_at,updated_at")
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .order("nome", { ascending: true })
     .returns<NamedUserRecord[]>();
 }
@@ -43,6 +44,7 @@ export async function getUserRecord(table: UserTableName, id: string) {
     .select("id,nome,user_id,created_at,updated_at")
     .eq("id", id)
     .eq("user_id", user.id)
+    .is("deleted_at", null)
     .maybeSingle<NamedUserRecord>();
 }
 
