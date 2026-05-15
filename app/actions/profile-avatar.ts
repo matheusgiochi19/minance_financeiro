@@ -35,36 +35,59 @@ function sanitizeFileName(fileName: string) {
 
 export async function uploadProfilePhoto(_previousState: AvatarUploadState, formData: FormData): Promise<AvatarUploadState> {
   try {
-    const file = formData.get("foto");
-    console.log("[avatar-debug] file-received", {
-      exists: file instanceof File,
-      name: file instanceof File ? file.name : null,
-      size: file instanceof File ? file.size : null,
-      type: file instanceof File ? file.type : null
-    });
-
-    if (!(file instanceof File) || file.size === 0) {
-      return { message: "Selecione uma imagem para enviar.", ok: false };
+    console.log("[avatar-debug] formdata-entries");
+    for (const pair of formData.entries()) {
+      console.log(pair[0], pair[1]);
     }
 
-    if (file.size > MAX_PHOTO_SIZE) {
+    const avatar = formData.get("avatar");
+    console.log("[avatar-debug] raw-avatar", avatar);
+    console.log("[avatar-debug] avatar-instanceof-file", avatar instanceof File);
+    console.log("[avatar-debug] file-received", {
+      exists: avatar instanceof File,
+      name: avatar instanceof File ? avatar.name : null,
+      size: avatar instanceof File ? avatar.size : null,
+      type: avatar instanceof File ? avatar.type : null
+    });
+
+    if (!(avatar instanceof File) || avatar.size === 0) {
+      return { message: "O backend nao recebeu um arquivo valido no campo avatar.", ok: false };
+    }
+
+    if (avatar.size > MAX_PHOTO_SIZE) {
       return { message: "A imagem deve ter no maximo 50MB.", ok: false };
     }
 
-    const ext = allowedImageTypes.get(file.type);
+    const ext = allowedImageTypes.get(avatar.type);
     if (!ext) {
       return { message: "Formato invalido. Envie JPG, PNG ou WEBP.", ok: false };
     }
 
     const { supabase, user } = await requireUser();
-    const safeOriginalName = sanitizeFileName(file.name);
+    console.log("[avatar-debug] user", {
+      email: user.email,
+      id: user.id
+    });
+
+    const buckets = await supabase.storage.listBuckets();
+    console.log("[avatar-debug] buckets", buckets);
+
+    if (buckets.error) {
+      return { message: `Falha ao listar buckets: ${buckets.error.message}`, ok: false };
+    }
+
+    if (!buckets.data?.some((bucket) => bucket.name === AVATAR_BUCKET || bucket.id === AVATAR_BUCKET)) {
+      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
+    }
+
+    const safeOriginalName = sanitizeFileName(avatar.name);
     const storagePath = `${user.id}/avatar-${crypto.randomUUID()}-profile.${ext}`;
     console.log("[avatar-debug] generated-path", storagePath);
 
     console.info("[avatar-upload]", {
-      contentType: file.type,
+      contentType: avatar.type,
       fileName: safeOriginalName,
-      size: file.size,
+      size: avatar.size,
       storagePath,
       userId: user.id
     });
@@ -72,9 +95,9 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     const { data: currentProfile } = await supabase.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle<{ avatar_url: string | null }>();
     const previousPath = currentProfile?.avatar_url && !currentProfile.avatar_url.startsWith("http") ? currentProfile.avatar_url : null;
 
-    const uploadResult = await supabase.storage.from(AVATAR_BUCKET).upload(storagePath, file, {
+    const uploadResult = await supabase.storage.from(AVATAR_BUCKET).upload(storagePath, avatar, {
       cacheControl: "3600",
-      contentType: file.type,
+      contentType: avatar.type,
       upsert: false
     });
     console.log("[avatar-debug] upload-result", uploadResult);

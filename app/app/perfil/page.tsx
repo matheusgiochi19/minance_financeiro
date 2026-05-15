@@ -5,6 +5,8 @@ import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
 
+export const runtime = "nodejs";
+
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
