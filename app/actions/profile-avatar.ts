@@ -68,27 +68,6 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
       email: user.email,
       id: user.id
     });
-    const bucketCheck = await supabase.storage.getBucket(AVATAR_BUCKET);
-    console.log("[avatar-bucket-check]", bucketCheck);
-
-    if (bucketCheck.error) {
-      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
-    }
-
-    if (!bucketCheck.data || (bucketCheck.data.name !== AVATAR_BUCKET && bucketCheck.data.id !== AVATAR_BUCKET)) {
-      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
-    }
-
-    const buckets = await supabase.storage.listBuckets();
-    console.log("[avatar-debug] buckets", buckets);
-
-    if (buckets.error) {
-      return { message: `Falha ao listar buckets: ${buckets.error.message}`, ok: false };
-    }
-
-    if (!buckets.data?.some((bucket) => bucket.name === AVATAR_BUCKET || bucket.id === AVATAR_BUCKET)) {
-      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
-    }
 
     const safeOriginalName = sanitizeFileName(avatar.name);
     const storagePath = `${user.id}/avatar-${crypto.randomUUID()}-profile.${ext}`;
@@ -106,19 +85,16 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     const previousPath = currentProfile?.avatar_url && !currentProfile.avatar_url.startsWith("http") ? currentProfile.avatar_url : null;
 
     const uploadResult = await supabase.storage.from(AVATAR_BUCKET).upload(storagePath, avatar, {
-      cacheControl: "3600",
       contentType: avatar.type,
-      upsert: false
+      upsert: true
     });
     console.log("[avatar-debug] upload-result", uploadResult);
 
     if (uploadResult.error) {
+      console.log("[avatar-upload-error]", uploadResult.error);
       return { message: `Upload falhou: ${uploadResult.error.message}`, ok: false };
     }
-    console.log("[avatar-upload-success]", {
-      path: storagePath,
-      userId: user.id
-    });
+    console.log("[avatar-upload-success]", storagePath);
 
     const { data: objectCheck, error: objectCheckError } = await supabase.storage.from(AVATAR_BUCKET).list(user.id);
     console.log("[avatar-debug] storage-check", objectCheck);
