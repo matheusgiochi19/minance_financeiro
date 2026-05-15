@@ -18,8 +18,6 @@ values (
 )
 on conflict (id) do nothing;
 
-alter table storage.objects enable row level security;
-
 drop policy if exists "avatar_select_own" on storage.objects;
 create policy "avatar_select_own"
 on storage.objects
