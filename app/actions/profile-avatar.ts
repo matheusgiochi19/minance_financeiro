@@ -36,6 +36,13 @@ function sanitizeFileName(fileName: string) {
 export async function uploadProfilePhoto(_previousState: AvatarUploadState, formData: FormData): Promise<AvatarUploadState> {
   try {
     const file = formData.get("foto");
+    console.log("[avatar-debug] file-received", {
+      exists: file instanceof File,
+      name: file instanceof File ? file.name : null,
+      size: file instanceof File ? file.size : null,
+      type: file instanceof File ? file.type : null
+    });
+
     if (!(file instanceof File) || file.size === 0) {
       return { message: "Selecione uma imagem para enviar.", ok: false };
     }
@@ -52,6 +59,7 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     const { supabase, user } = await requireUser();
     const safeOriginalName = sanitizeFileName(file.name);
     const storagePath = `${user.id}/avatar-${crypto.randomUUID()}-profile.${ext}`;
+    console.log("[avatar-debug] generated-path", storagePath);
 
     console.info("[avatar-upload]", {
       contentType: file.type,
@@ -64,15 +72,32 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     const { data: currentProfile } = await supabase.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle<{ avatar_url: string | null }>();
     const previousPath = currentProfile?.avatar_url && !currentProfile.avatar_url.startsWith("http") ? currentProfile.avatar_url : null;
 
-    const { error: uploadError } = await supabase.storage.from(AVATAR_BUCKET).upload(storagePath, file, {
+    const uploadResult = await supabase.storage.from(AVATAR_BUCKET).upload(storagePath, file, {
       cacheControl: "3600",
       contentType: file.type,
       upsert: false
     });
+    console.log("[avatar-debug] upload-result", uploadResult);
 
-    if (uploadError) {
-      return { message: `Upload falhou: ${uploadError.message}`, ok: false };
+    if (uploadResult.error) {
+      return { message: `Upload falhou: ${uploadResult.error.message}`, ok: false };
     }
+
+    const { data: objectCheck, error: objectCheckError } = await supabase.storage.from(AVATAR_BUCKET).list(user.id);
+    console.log("[avatar-debug] storage-check", objectCheck);
+
+    if (objectCheckError) {
+      return { message: `Falha ao validar o Storage: ${objectCheckError.message}`, ok: false };
+    }
+
+    if (!objectCheck?.some((item) => `${user.id}/${item.name}` === storagePath)) {
+      return { message: "Upload concluido, mas o objeto nao foi encontrado no Storage.", ok: false };
+    }
+
+    console.log("[avatar-debug] saving-profile", {
+      storagePath,
+      userId: user.id
+    });
 
     const { error: profileError } = await supabase.rpc("save_my_avatar_path", {
       p_avatar_path: storagePath
@@ -85,7 +110,25 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
 
     await supabase.auth.updateUser({ data: { avatar_url: storagePath } });
 
-    const { data: savedProfile, error: readError } = await supabase.from("profiles").select("avatar_url").eq("user_id", user.id).maybeSingle<{ avatar_url: string | null }>();
+    const profileByUserIdResult = await supabase
+      .from("profiles")
+      .select("id,user_id,avatar_url")
+      .eq("user_id", user.id)
+      .maybeSingle<{ avatar_url: string | null; id: string; user_id: string }>();
+    const profileByIdResult = await supabase
+      .from("profiles")
+      .select("id,user_id,avatar_url")
+      .eq("id", user.id)
+      .maybeSingle<{ avatar_url: string | null; id: string; user_id: string }>();
+
+    console.log("[avatar-debug] profile-after-save", {
+      byId: profileByIdResult.data,
+      byUserId: profileByUserIdResult.data,
+      userId: user.id
+    });
+
+    const savedProfile = profileByUserIdResult.data;
+    const readError = profileByUserIdResult.error;
 
     console.info("[avatar-db-save]", {
       avatarPersisted: savedProfile?.avatar_url === storagePath,
@@ -96,6 +139,14 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     if (readError || savedProfile?.avatar_url !== storagePath) {
       await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]);
       return { message: readError?.message || "Imagem enviada, mas o banco nao confirmou o path do avatar.", ok: false };
+    }
+
+    const signedUrlData = await supabase.storage.from(AVATAR_BUCKET).createSignedUrl(storagePath, 60 * 60);
+    console.log("[avatar-debug] signed-url", signedUrlData);
+
+    if (signedUrlData.error || !signedUrlData.data?.signedUrl) {
+      await supabase.storage.from(AVATAR_BUCKET).remove([storagePath]);
+      return { message: signedUrlData.error?.message || "O avatar foi salvo, mas a signed URL falhou na validacao.", ok: false };
     }
 
     if (previousPath && previousPath !== storagePath) {

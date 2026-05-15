@@ -60,6 +60,7 @@ export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps)
       const profile = (await response.json()) as { avatarUrl: string | null; fullName: string | null };
       setProfileAvatarUrl(profile.avatarUrl);
       setProfileName(profile.fullName);
+      console.log("[avatar-debug] navbar-avatar", profile.avatarUrl);
       console.info("[avatar-navbar]", { hasAvatar: Boolean(profile.avatarUrl) });
     };
 

@@ -28,6 +28,11 @@ export async function resolveAvatarUrl(avatarPath: string | null | undefined) {
   const supabase = await createClient();
   const { data, error } = await supabase.storage.from("profile-avatars").createSignedUrl(avatarPath, 60 * 60);
 
+  console.log("[avatar-debug] signed-url", {
+    error: error?.message || null,
+    path: avatarPath,
+    signedUrl: data?.signedUrl || null
+  });
   console.info("[avatar-signed-url]", {
     hasSignedUrl: Boolean(data?.signedUrl),
     path: avatarPath,
@@ -52,6 +57,13 @@ export async function getCurrentProfile() {
     .select("id,user_id,email,full_name,avatar_url,role,ativo,foto_path,juros_atraso,onboarding_hidden,tema,created_at,updated_at")
     .eq("user_id", user.id)
     .maybeSingle<Profile>();
+
+  console.log("[avatar-debug] profile-lookup", {
+    avatarUrl: profile?.avatar_url || null,
+    profileId: profile?.id || null,
+    profileUserId: profile?.user_id || null,
+    userId: user.id
+  });
 
   return { user, profile };
 }
