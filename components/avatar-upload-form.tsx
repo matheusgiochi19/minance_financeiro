@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
@@ -20,6 +19,7 @@ const initialState: AvatarUploadState = {
 export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUploadFormProps) {
   const [state, formAction, isPending] = useActionState(uploadProfilePhoto, initialState);
   const router = useRouter();
+  void initialAvatarUrl;
 
   const feedbackClass = useMemo(() => (state.ok ? "form-message success" : "form-message"), [state.ok]);
 
@@ -31,7 +31,7 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
 
   return (
     <div className="avatar-upload-panel">
-      {initialAvatarUrl ? <Image alt="" className="profile-photo" height={160} src={initialAvatarUrl} width={160} /> : <div className="profile-photo profile-photo-fallback">{fallbackInitial}</div>}
+      <div className="profile-photo profile-photo-fallback">{fallbackInitial}</div>
       <form action={formAction} className="entity-form" encType="multipart/form-data">
         <label>
           <span>Imagem</span>

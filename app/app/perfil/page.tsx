@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
 import { AvatarUploadForm } from "@/components/avatar-upload-form";
 import { FormSubmitButton } from "@/components/form-submit-button";
@@ -20,7 +19,7 @@ export default async function PerfilPage() {
         <Card className="entity-form-card">
           <h2>Identidade</h2>
           <div className="profile-preview">
-            {avatarUrl ? <Image alt="" className="profile-photo" height={160} src={avatarUrl} width={160} /> : <div className="profile-photo profile-photo-fallback">{initial}</div>}
+            <div className="profile-photo profile-photo-fallback">{initial}</div>
             <strong>{fullName || "Seu nome"}</strong>
           </div>
           <form action={updateProfile} className="entity-form">

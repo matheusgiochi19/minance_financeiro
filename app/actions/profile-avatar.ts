@@ -68,6 +68,16 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
       email: user.email,
       id: user.id
     });
+    const bucketCheck = await supabase.storage.getBucket(AVATAR_BUCKET);
+    console.log("[avatar-bucket-check]", bucketCheck);
+
+    if (bucketCheck.error) {
+      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
+    }
+
+    if (!bucketCheck.data || (bucketCheck.data.name !== AVATAR_BUCKET && bucketCheck.data.id !== AVATAR_BUCKET)) {
+      return { message: `Bucket ${AVATAR_BUCKET} nao encontrado. Execute a migration da sprint.`, ok: false };
+    }
 
     const buckets = await supabase.storage.listBuckets();
     console.log("[avatar-debug] buckets", buckets);
@@ -105,6 +115,10 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
     if (uploadResult.error) {
       return { message: `Upload falhou: ${uploadResult.error.message}`, ok: false };
     }
+    console.log("[avatar-upload-success]", {
+      path: storagePath,
+      userId: user.id
+    });
 
     const { data: objectCheck, error: objectCheckError } = await supabase.storage.from(AVATAR_BUCKET).list(user.id);
     console.log("[avatar-debug] storage-check", objectCheck);
@@ -157,6 +171,11 @@ export async function uploadProfilePhoto(_previousState: AvatarUploadState, form
       avatarPersisted: savedProfile?.avatar_url === storagePath,
       storagePath,
       userId: user.id
+    });
+    console.log("[avatar-db-persist]", {
+      byId: profileByIdResult.data?.avatar_url || null,
+      byUserId: profileByUserIdResult.data?.avatar_url || null,
+      storagePath
     });
 
     if (readError || savedProfile?.avatar_url !== storagePath) {

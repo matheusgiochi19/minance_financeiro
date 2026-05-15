@@ -61,6 +61,7 @@ export function AppShell({ avatarUrl, children, fullName, role }: AppShellProps)
       setProfileAvatarUrl(profile.avatarUrl);
       setProfileName(profile.fullName);
       console.log("[avatar-debug] navbar-avatar", profile.avatarUrl);
+      console.log("[avatar-navbar-render]", profile.avatarUrl);
       console.info("[avatar-navbar]", { hasAvatar: Boolean(profile.avatarUrl) });
     };
 
