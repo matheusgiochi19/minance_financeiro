@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCompetenceDate, parseCurrency, getExpenseStatus } from "@/lib/expenses";
+import { setFlashMessage } from "@/lib/flash";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { withTransactionRetry } from "@/services/transaction.service";
 
@@ -44,7 +45,8 @@ export async function createDespesa(formData: FormData) {
   const valor = parseCurrency(formData.get("valor"));
 
   if (!descricao || valor <= 0) {
-    return;
+    await setFlashMessage("error", "Preencha descricao e valor validos para a despesa.");
+    redirect("/app/despesas/nova");
   }
 
   const { supabase, user } = await requireAuthenticatedUser();
@@ -64,7 +66,12 @@ export async function createDespesa(formData: FormData) {
   if (error && attachment.path) {
     await supabase.storage.from("despesas-anexos").remove([attachment.path]);
   }
+  if (error) {
+    await setFlashMessage("error", error.message);
+    redirect("/app/despesas/nova");
+  }
 
+  await setFlashMessage("success", "Despesa salva com sucesso.");
   revalidatePath("/app/despesas");
   redirect("/app/despesas");
 }
@@ -75,7 +82,8 @@ export async function updateDespesa(formData: FormData) {
   const valor = parseCurrency(formData.get("valor"));
 
   if (!id || !descricao || valor <= 0) {
-    return;
+    await setFlashMessage("error", "Nao foi possivel salvar a despesa.");
+    redirect(id ? `/app/despesas/${id}/editar` : "/app/despesas");
   }
 
   const { supabase, user } = await requireAuthenticatedUser();
@@ -96,7 +104,12 @@ export async function updateDespesa(formData: FormData) {
   if (error && attachment.path) {
     await supabase.storage.from("despesas-anexos").remove([attachment.path]);
   }
+  if (error) {
+    await setFlashMessage("error", error.message);
+    redirect(`/app/despesas/${id}/editar`);
+  }
 
+  await setFlashMessage("success", "Despesa atualizada com sucesso.");
   revalidatePath("/app/despesas");
   redirect("/app/despesas");
 }
@@ -110,12 +123,18 @@ export async function deleteDespesa(formData: FormData) {
   }
 
   const { supabase } = await requireAuthenticatedUser();
-  await withTransactionRetry(() => supabase.rpc("delete_despesa", { p_id: id }));
+  const result = await withTransactionRetry(() => supabase.rpc("delete_despesa", { p_id: id }));
+  if (result.error) {
+    await setFlashMessage("error", result.error.message);
+    revalidatePath("/app/despesas");
+    return;
+  }
 
   if (anexoPath) {
     await supabase.storage.from("despesas-anexos").remove([anexoPath]);
   }
 
+  await setFlashMessage("success", "Despesa excluida com sucesso.");
   revalidatePath("/app/despesas");
 }
 
@@ -127,6 +146,12 @@ export async function markDespesaAsPaid(formData: FormData) {
   }
 
   const { supabase } = await requireAuthenticatedUser();
-  await withTransactionRetry(() => supabase.rpc("mark_despesa_paid", { p_id: id }));
+  const result = await withTransactionRetry(() => supabase.rpc("mark_despesa_paid", { p_id: id }));
+  if (result.error) {
+    await setFlashMessage("error", result.error.message);
+    revalidatePath("/app/despesas");
+    return;
+  }
+  await setFlashMessage("success", "Despesa marcada como paga.");
   revalidatePath("/app/despesas");
 }

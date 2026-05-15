@@ -4,10 +4,11 @@ import { deleteCartaoDespesa } from "@/app/app/cartoes/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { MonthFilter } from "@/components/month-filter";
 import { Pagination } from "@/components/pagination";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
-import { expenseStatusLabels, formatCurrency, type ExpenseStatus } from "@/lib/expenses";
-import { getUserCartao, type CartaoDespesa } from "@/lib/income-cards";
+import { formatCurrency, type ExpenseStatus } from "@/lib/expenses";
+import { cardExpenseStatusLabels, getUserCartao, type CartaoDespesa } from "@/lib/income-cards";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { getPeriodoMes } from "@/services/finance.service";
@@ -42,8 +43,10 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
     .range(from, to)
     .returns<CartaoDespesa[]>();
 
-  const { data: fatura } = await supabase.from("cartao_despesas").select("valor").eq("cartao_id", id).eq("user_id", user.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
-  const totalFatura = (fatura || []).reduce((total, despesa) => total + Number(despesa.valor || 0), 0);
+  const totalAberto = (despesas || []).reduce((total, despesa) => (despesa.status === "ab" ? total + Number(despesa.valor || 0) : total), 0);
+  const totalParcial = (despesas || []).reduce((total, despesa) => (despesa.status === "p" ? total + Number(despesa.valor || 0) : total), 0);
+  const totalPago = (despesas || []).reduce((total, despesa) => (despesa.status === "pp" ? total + Number(despesa.valor || 0) : total), 0);
+  const totalFatura = totalAberto + totalParcial;
 
   return (
     <section className="expenses-page">
@@ -51,32 +54,35 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
         <div>
           <p>Fatura</p>
           <h1>{cartao.nome}</h1>
-          <span>Despesas do cartão e fatura mensal calculada automaticamente.</span>
+          <span>Despesas do cartao e fatura mensal calculada automaticamente.</span>
         </div>
         <Link className="primary-button" href={`/app/cartoes/${id}/despesas/nova`}>Nova despesa</Link>
       </div>
       <MonthFilter month={periodo.mes} />
       <div className="expense-summary-grid">
-        <Card className="summary-card" tone="cards"><span>Fatura mês</span><strong>{formatCurrency(totalFatura)}</strong></Card>
+        <Card className="summary-card" tone="cards"><span>Fatura em aberto</span><strong>{formatCurrency(totalFatura)}</strong></Card>
+        <Card className="summary-card" tone="expense"><span>Itens abertos</span><strong>{formatCurrency(totalAberto)}</strong></Card>
+        <Card className="summary-card" tone="muted"><span>Itens parciais</span><strong>{formatCurrency(totalParcial)}</strong></Card>
+        <Card className="summary-card" tone="income"><span>Itens pagos</span><strong>{formatCurrency(totalPago)}</strong></Card>
       </div>
-      {error ? <p className="admin-alert">Não foi possível carregar despesas do cartão: {error.message}</p> : null}
+      {error ? <AlertBanner message={`Nao foi possivel carregar despesas do cartao: ${error.message}`} type="error" /> : null}
       <TableWrap>
         <Table className="expenses-table clean-expenses-table">
           <TableHead>
             <TableRow>
-              <TableHeader>Situação</TableHeader>
+              <TableHeader>Situacao</TableHeader>
               <TableHeader>Data</TableHeader>
-              <TableHeader>Descrição</TableHeader>
+              <TableHeader>Descricao</TableHeader>
               <TableHeader>Categoria</TableHeader>
               <TableHeader>Valor</TableHeader>
-              <TableHeader>Ações</TableHeader>
+              <TableHeader>Acoes</TableHeader>
             </TableRow>
           </TableHead>
           <TableBody>
-            {(despesas || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={6}>Nenhuma despesa neste cartão.</TableCell></TableRow> : null}
+            {(despesas || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={6}>Nenhuma despesa neste cartao.</TableCell></TableRow> : null}
             {(despesas || []).map((despesa) => (
               <TableRow key={despesa.id}>
-                <TableCell><span className={`status-pill expense-status-${despesa.status as ExpenseStatus}`}>{expenseStatusLabels[despesa.status]}</span></TableCell>
+                <TableCell><span className={`status-pill expense-status-${despesa.status as ExpenseStatus}`}>{cardExpenseStatusLabels[despesa.status]}</span></TableCell>
                 <TableCell>{new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(despesa.data_competencia))}</TableCell>
                 <TableCell><strong>{despesa.descricao}</strong></TableCell>
                 <TableCell>{despesa.categorias?.nome || "-"}</TableCell>

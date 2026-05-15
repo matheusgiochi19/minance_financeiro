@@ -40,6 +40,11 @@ export type CartaoDespesa = {
 };
 
 export const cardColors = ["#AD563E", "#293B50", "#3C5D12", "#FF7654", "#6E5BD8", "#4CA6A8"];
+export const cardExpenseStatusLabels: Record<CartaoDespesa["status"], string> = {
+  ab: "Aberto",
+  p: "Parcial",
+  pp: "Pago"
+};
 
 export function randomCardColor() {
   return cardColors[Math.floor(Math.random() * cardColors.length)];
@@ -86,12 +91,12 @@ export async function getCurrentInvoiceTotal(cartaoId: string) {
   const end = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
   const { data } = await supabase
     .from("cartao_despesas")
-    .select("valor")
+    .select("valor,status")
     .eq("cartao_id", cartaoId)
     .is("deleted_at", null)
     .gte("data_competencia", start.slice(0, 10))
     .lt("data_competencia", end.slice(0, 10))
-    .returns<Array<{ valor: number }>>();
+    .returns<Array<{ status: CartaoDespesa["status"]; valor: number }>>();
 
-  return (data || []).reduce((total, item) => total + Number(item.valor || 0), 0);
+  return (data || []).reduce((total, item) => (item.status === "pp" ? total : total + Number(item.valor || 0)), 0);
 }

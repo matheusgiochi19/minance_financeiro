@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CurrencyInput } from "@/components/currency-input";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import { type ExpenseOption } from "@/lib/expenses";
 import type { Orcamento } from "@/lib/budgets";
@@ -33,7 +33,7 @@ export function OrcamentoForm({ action, categories, defaultOrcamento }: Orcament
           <CurrencyInput defaultValue={defaultOrcamento?.valor_limite} name="valor_limite" placeholder="Opcional" />
         </label>
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton>Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href="/app/orcamento">Cancelar</Link>
         </div>
       </form>

@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo } from "react";
+import { useActionState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { uploadProfilePhoto, type AvatarUploadState } from "@/app/actions/profile-avatar";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Button } from "@/components/ui/button";
 
 type AvatarUploadFormProps = {
@@ -20,8 +21,6 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
   const [state, formAction, isPending] = useActionState(uploadProfilePhoto, initialState);
   const router = useRouter();
   void initialAvatarUrl;
-
-  const feedbackClass = useMemo(() => (state.ok ? "form-message success" : "form-message"), [state.ok]);
 
   useEffect(() => {
     if (!state.ok) return;
@@ -47,7 +46,7 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
           {isPending ? <Loader2 aria-hidden className="spin" size={18} /> : null}
           {isPending ? "Enviando avatar..." : "Enviar avatar"}
         </Button>
-        {state.message ? <p className={feedbackClass}>{state.message}</p> : null}
+        {state.message ? <AlertBanner key={`${state.ok ? "success" : "error"}-${state.message}`} message={state.message} type={state.ok ? "success" : "error"} /> : null}
       </form>
     </div>
   );

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import type { NamedUserRecord } from "@/lib/user-data";
 
@@ -22,7 +22,7 @@ export function NamedRecordForm({ action, cancelHref, defaultRecord, placeholder
           <input defaultValue={defaultRecord?.nome || ""} maxLength={80} name="nome" placeholder={placeholder} required />
         </label>
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton>Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href={cancelHref}>Cancelar</Link>
         </div>
       </form>

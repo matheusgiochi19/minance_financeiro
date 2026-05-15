@@ -2,7 +2,8 @@ import Link from "next/link";
 import { CurrencyInput } from "@/components/currency-input";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { expenseStatusLabels, type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
+import { type ExpenseOption, type ExpenseStatus } from "@/lib/expenses";
+import { cardExpenseStatusLabels } from "@/lib/income-cards";
 import type { CartaoDespesa } from "@/lib/income-cards";
 
 type CartaoDespesaFormProps = {
@@ -33,7 +34,7 @@ export function CartaoDespesaForm({ action, cartaoId, categories, defaultDespesa
         <label>
           <span>Status</span>
           <select defaultValue={defaultDespesa?.status || "p"} name="status">
-            {statusOptions.map((status) => <option key={status} value={status}>{expenseStatusLabels[status]}</option>)}
+            {statusOptions.map((status) => <option key={status} value={status}>{cardExpenseStatusLabels[status]}</option>)}
           </select>
         </label>
         <label>

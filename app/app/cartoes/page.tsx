@@ -4,7 +4,7 @@ import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { MonthFilter } from "@/components/month-filter";
 import { Pagination } from "@/components/pagination";
 import { formatCurrency } from "@/lib/expenses";
-import type { Cartao } from "@/lib/income-cards";
+import type { Cartao, CartaoDespesa } from "@/lib/income-cards";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { getPeriodoMes } from "@/services/finance.service";
@@ -31,8 +31,8 @@ export default async function CartoesPage({ searchParams }: CartoesPageProps) {
     .returns<Cartao[]>();
   const invoicePairs = await Promise.all(
     (cartoes || []).map(async (cartao) => {
-      const { data } = await supabase.from("cartao_despesas").select("valor").eq("user_id", user.id).eq("cartao_id", cartao.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<{ valor: number }>>();
-      return [cartao.id, (data || []).reduce((total, item) => total + Number(item.valor || 0), 0)] as const;
+      const { data } = await supabase.from("cartao_despesas").select("valor,status").eq("user_id", user.id).eq("cartao_id", cartao.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<Pick<CartaoDespesa, "status" | "valor">>>();
+      return [cartao.id, (data || []).reduce((total, item) => (item.status === "pp" ? total : total + Number(item.valor || 0)), 0)] as const;
     })
   );
   const invoiceTotals = new Map(invoicePairs);

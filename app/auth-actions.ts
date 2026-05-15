@@ -6,6 +6,7 @@ import { getSiteUrl } from "@/lib/env";
 
 type AuthState = {
   message: string;
+  type?: "error" | "success";
 };
 
 export async function signUp(_previousState: AuthState, formData: FormData): Promise<AuthState> {
@@ -14,11 +15,11 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
   const password = String(formData.get("password") || "");
 
   if (!fullName || !email || !password) {
-    return { message: "Informe nome completo, e-mail e senha." };
+    return { message: "Informe nome completo, e-mail e senha.", type: "error" };
   }
 
   if (password.length < 6) {
-    return { message: "A senha deve ter pelo menos 6 caracteres." };
+    return { message: "A senha deve ter pelo menos 6 caracteres.", type: "error" };
   }
 
   const supabase = await createClient();
@@ -34,7 +35,7 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
   });
 
   if (error) {
-    return { message: error.message };
+    return { message: error.message, type: "error" };
   }
 
   if (data.user) {
@@ -45,7 +46,7 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
     }, { onConflict: "user_id" });
   }
 
-  return { message: "Cadastro criado. Confirme seu e-mail antes de acessar o Minance." };
+  return { message: "Cadastro criado. Confirme seu e-mail antes de acessar o Minance.", type: "success" };
 }
 
 export async function signIn(_previousState: AuthState, formData: FormData): Promise<AuthState> {
@@ -54,7 +55,7 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
   const redirectTo = String(formData.get("redirectTo") || "/app/dashboard");
 
   if (!email || !password) {
-    return { message: "Informe e-mail e senha." };
+    return { message: "Informe e-mail e senha.", type: "error" };
   }
 
   const supabase = await createClient();
@@ -64,12 +65,12 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
   });
 
   if (error) {
-    return { message: error.message };
+    return { message: error.message, type: "error" };
   }
 
   if (!data.user?.email_confirmed_at) {
     await supabase.auth.signOut();
-    return { message: "Confirme seu e-mail antes de fazer login." };
+    return { message: "Confirme seu e-mail antes de fazer login.", type: "error" };
   }
 
   const { data: profile } = await supabase
@@ -80,7 +81,7 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
 
   if (profile?.ativo === false) {
     await supabase.auth.signOut();
-    return { message: "Seu usuário está bloqueado. Fale com o administrador." };
+    return { message: "Seu usuario esta bloqueado. Fale com o administrador.", type: "error" };
   }
 
   redirect(redirectTo.startsWith("/app") ? redirectTo : "/app/dashboard");

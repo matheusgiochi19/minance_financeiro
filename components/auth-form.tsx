@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useActionState } from "react";
 import { Loader2 } from "lucide-react";
+import { AlertBanner } from "@/components/ui/alert-banner";
 import { Button } from "@/components/ui/button";
 
 type AuthFormProps = {
-  action: (previousState: { message: string }, formData: FormData) => Promise<{ message: string }>;
+  action: (previousState: { message: string; type?: "error" | "success" }, formData: FormData) => Promise<{ message: string; type?: "error" | "success" }>;
   buttonLabel: string;
   footerHref: string;
   footerLabel: string;
@@ -16,7 +17,8 @@ type AuthFormProps = {
 };
 
 const initialState = {
-  message: ""
+  message: "",
+  type: "error" as const
 };
 
 export function AuthForm({
@@ -51,7 +53,7 @@ export function AuthForm({
         {isPending ? <Loader2 aria-hidden className="spin" size={18} /> : null}
         {buttonLabel}
       </Button>
-      {state.message ? <p className="form-message">{state.message}</p> : null}
+      {state.message ? <AlertBanner key={`${state.type || "error"}-${state.message}`} message={state.message} type={state.type || "error"} /> : null}
       <p className="auth-footer">
         {footerText} <Link href={footerHref}>{footerLabel}</Link>
       </p>

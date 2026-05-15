@@ -387,13 +387,13 @@ button {
 
 .app-frame {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 274px 1fr;
   min-height: 100vh;
   transition: grid-template-columns 0.2s ease;
 }
 
 .app-frame.sidebar-collapsed {
-  grid-template-columns: 82px 1fr;
+  grid-template-columns: 61px 1fr;
 }
 
 .sidebar {
@@ -409,7 +409,7 @@ button {
   display: flex;
   gap: 10px;
   min-width: 0;
-  padding: 0 18px;
+  padding: 0 14px;
 }
 
 .brand-block img {
@@ -436,7 +436,7 @@ button {
 .sidebar nav {
   display: grid;
   gap: 8px;
-  padding: 52px 24px 0;
+  padding: 52px 14px 0;
 }
 
 .nav-link {
@@ -447,18 +447,20 @@ button {
   font-weight: 900;
   gap: 22px;
   grid-template-columns: 28px 1fr;
-  min-height: 42px;
+  min-height: 45px;
+  padding: 0 14px;
   text-transform: uppercase;
 }
 
 .sidebar-collapsed .sidebar nav {
-  padding-inline: 18px;
+  padding-inline: 8px;
 }
 
 .sidebar-collapsed .nav-link {
   gap: 0;
   grid-template-columns: 1fr;
   justify-items: center;
+  padding: 0;
 }
 
 .sidebar-collapsed .nav-link span {
@@ -481,10 +483,10 @@ button {
   color: rgba(255, 255, 255, 0.88);
   cursor: pointer;
   display: inline-flex;
-  height: 44px;
+  height: 45px;
   justify-content: center;
   justify-self: center;
-  width: 44px;
+  width: 45px;
   border-radius: 8px;
 }
 
@@ -511,6 +513,58 @@ button {
   display: grid;
   grid-template-rows: 64px 1fr;
   min-width: 0;
+}
+
+.alert-banner {
+  align-items: center;
+  border-radius: 8px;
+  box-shadow: 0 16px 30px rgba(29, 36, 51, 0.12);
+  color: #fff;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin: 18px 0 0;
+  min-height: 54px;
+  padding: 14px 16px;
+  transform: translateY(0);
+  transition: opacity 0.22s ease, transform 0.22s ease, max-height 0.22s ease, margin 0.22s ease, padding 0.22s ease;
+}
+
+.alert-banner p {
+  margin: 0;
+  line-height: 1.45;
+}
+
+.alert-banner-success {
+  background: #4f7d25;
+}
+
+.alert-banner-error {
+  background: #c45a3d;
+}
+
+.alert-banner-close {
+  align-items: center;
+  background: transparent;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 28px;
+  justify-content: center;
+  width: 28px;
+}
+
+.alert-banner.is-hidden {
+  margin: 0;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  padding-bottom: 0;
+  padding-top: 0;
+  transform: translateY(-8px);
 }
 
 .topbar {

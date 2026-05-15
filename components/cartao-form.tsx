@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { CurrencyInput } from "@/components/currency-input";
-import { Button } from "@/components/ui/button";
+import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
 import type { Cartao } from "@/lib/income-cards";
 
@@ -24,7 +24,7 @@ export function CartaoForm({ action, defaultCartao }: CartaoFormProps) {
           <CurrencyInput defaultValue={defaultCartao?.limite} name="limite" />
         </label>
         <div className="form-actions">
-          <Button type="submit">Salvar</Button>
+          <FormSubmitButton>Salvar</FormSubmitButton>
           <Link className="secondary-link-button" href="/app/cartoes">Cancelar</Link>
         </div>
       </form>
