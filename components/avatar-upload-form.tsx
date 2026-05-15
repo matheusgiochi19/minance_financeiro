@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
-import { uploadProfilePhoto, type AvatarUploadState } from "@/app/app/perfil/actions";
+import { uploadProfilePhoto, type AvatarUploadState } from "@/app/actions/profile-avatar";
 import { Button } from "@/components/ui/button";
 
 type AvatarUploadFormProps = {
@@ -19,9 +19,7 @@ const initialState: AvatarUploadState = {
 
 export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUploadFormProps) {
   const [state, formAction, isPending] = useActionState(uploadProfilePhoto, initialState);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(initialAvatarUrl || null);
   const router = useRouter();
-  const displayUrl = state.avatarUrl || previewUrl;
 
   const feedbackClass = useMemo(() => (state.ok ? "form-message success" : "form-message"), [state.ok]);
 
@@ -33,7 +31,7 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
 
   return (
     <div className="avatar-upload-panel">
-      {displayUrl ? <Image alt="" className="profile-photo" height={160} src={displayUrl} width={160} /> : <div className="profile-photo profile-photo-fallback">{fallbackInitial}</div>}
+      {initialAvatarUrl ? <Image alt="" className="profile-photo" height={160} src={initialAvatarUrl} width={160} /> : <div className="profile-photo profile-photo-fallback">{fallbackInitial}</div>}
       <form action={formAction} className="entity-form" encType="multipart/form-data">
         <label>
           <span>Imagem</span>
@@ -43,10 +41,6 @@ export function AvatarUploadForm({ fallbackInitial, initialAvatarUrl }: AvatarUp
             name="foto"
             type="file"
             required
-            onChange={(event) => {
-              const file = event.target.files?.[0];
-              if (file) setPreviewUrl(URL.createObjectURL(file));
-            }}
           />
         </label>
         <Button disabled={isPending} type="submit">

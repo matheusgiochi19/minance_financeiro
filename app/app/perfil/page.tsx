@@ -3,13 +3,13 @@ import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/act
 import { AvatarUploadForm } from "@/components/avatar-upload-form";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { getAvatarDisplayUrl, getCurrentProfile } from "@/lib/profiles";
+import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
 
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
   const initial = (fullName || user?.email || "U").slice(0, 1).toUpperCase();
-  const avatarUrl = getAvatarDisplayUrl(profile);
+  const avatarUrl = await resolveAvatarUrl(profile?.avatar_url);
 
   return (
     <section className="records-page">

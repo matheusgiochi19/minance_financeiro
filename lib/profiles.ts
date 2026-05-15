@@ -18,10 +18,23 @@ export type Profile = {
   updated_at: string;
 };
 
-export function getAvatarDisplayUrl(profile: Pick<Profile, "avatar_url" | "updated_at"> | null | undefined) {
-  if (!profile?.avatar_url) return null;
-  const separator = profile.avatar_url.includes("?") ? "&" : "?";
-  return `${profile.avatar_url}${separator}v=${encodeURIComponent(profile.updated_at)}`;
+export async function resolveAvatarUrl(avatarPath: string | null | undefined) {
+  if (!avatarPath) return null;
+
+  if (avatarPath.startsWith("http")) {
+    return avatarPath;
+  }
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.storage.from("profile-avatars").createSignedUrl(avatarPath, 60 * 60);
+
+  console.info("[avatar-signed-url]", {
+    hasSignedUrl: Boolean(data?.signedUrl),
+    path: avatarPath,
+    storageError: error?.message
+  });
+
+  return data?.signedUrl || null;
 }
 
 export async function getCurrentProfile() {

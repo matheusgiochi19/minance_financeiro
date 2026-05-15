@@ -3,15 +3,6 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
-const MAX_PHOTO_SIZE = 50 * 1024 * 1024;
-const allowedImageTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
-
-export type AvatarUploadState = {
-  avatarUrl?: string;
-  message: string;
-  ok: boolean;
-};
-
 export async function updateProfile(formData: FormData) {
   const fullName = String(formData.get("full_name") || "").trim();
   if (!fullName) return;
@@ -49,87 +40,4 @@ export async function updatePassword(formData: FormData) {
   const supabase = await createClient();
   await supabase.auth.updateUser({ password });
   revalidatePath("/app/perfil");
-}
-
-export async function uploadProfilePhoto(_previousState: AvatarUploadState, formData: FormData): Promise<AvatarUploadState> {
-  const file = formData.get("foto");
-  if (!(file instanceof File) || file.size === 0) {
-    return { message: "Selecione uma imagem para enviar.", ok: false };
-  }
-
-  if (file.size > MAX_PHOTO_SIZE) {
-    return { message: "A imagem deve ter no máximo 50MB.", ok: false };
-  }
-
-  if (!allowedImageTypes.has(file.type)) {
-    return { message: "Formato inválido. Envie JPG, PNG ou WEBP.", ok: false };
-  }
-
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) {
-    return { message: "Sessão expirada. Faça login novamente.", ok: false };
-  }
-
-  const path = `${user.id}/avatar-profile`;
-  await supabase.storage.from("avatars").remove([
-    `${user.id}/profile-avatar.gif`,
-    `${user.id}/profile-avatar.jpg`,
-    `${user.id}/profile-avatar.png`,
-    `${user.id}/profile-avatar.webp`
-  ]);
-
-  const { error } = await supabase.storage.from("avatars").upload(path, file, {
-    contentType: file.type,
-    upsert: true
-  });
-
-  if (error) {
-    return { message: `Upload falhou: ${error.message}`, ok: false };
-  }
-
-  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
-  const avatarUrl = data.publicUrl;
-  const displayAvatarUrl = `${avatarUrl}?v=${Date.now()}`;
-
-  if (!avatarUrl.includes("/storage/v1/object/public/avatars/") || avatarUrl.startsWith("blob:") || avatarUrl.includes("localhost")) {
-    return { message: "Storage retornou uma URL invalida para persistencia do avatar.", ok: false };
-  }
-
-  const { error: profileError } = await supabase.rpc("update_my_avatar", {
-    p_avatar_url: avatarUrl,
-    p_foto_path: path
-  });
-
-  if (profileError) {
-    return { message: `Imagem enviada, mas não foi possível salvar no perfil: ${profileError.message}`, ok: false };
-  }
-
-  const { data: storedFiles, error: storageReadError } = await supabase.storage.from("avatars").list(user.id, { search: "avatar-profile" });
-  if (storageReadError || !storedFiles?.some((item) => item.name === "avatar-profile")) {
-    return { message: storageReadError?.message || "Imagem enviada, mas o arquivo nao foi confirmado no bucket avatars.", ok: false };
-  }
-
-  const { data: savedProfile, error: readError } = await supabase
-    .from("profiles")
-    .select("avatar_url,updated_at")
-    .eq("user_id", user.id)
-    .maybeSingle<{ avatar_url: string | null; updated_at: string | null }>();
-
-  console.info("[avatar-upload]", {
-    avatarPersisted: savedProfile?.avatar_url === avatarUrl,
-    filePath: path,
-    hasUpdatedAt: Boolean(savedProfile?.updated_at),
-    userId: user.id
-  });
-
-  if (readError || savedProfile?.avatar_url !== avatarUrl) {
-    return { message: readError?.message || "Imagem enviada, mas o perfil não confirmou a persistência do avatar.", ok: false };
-  }
-
-  revalidatePath("/app", "layout");
-  revalidatePath("/app/perfil");
-  return { avatarUrl: displayAvatarUrl, message: "Foto atualizada com sucesso.", ok: true };
 }

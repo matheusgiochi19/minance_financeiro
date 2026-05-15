@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAvatarDisplayUrl, getCurrentProfile } from "@/lib/profiles";
+import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
 
 export async function GET() {
   const { profile, user } = await getCurrentProfile();
@@ -10,7 +10,7 @@ export async function GET() {
 
   return NextResponse.json(
     {
-      avatarUrl: getAvatarDisplayUrl(profile),
+      avatarUrl: await resolveAvatarUrl(profile?.avatar_url),
       fullName: profile?.full_name || user.user_metadata?.full_name || user.email || null
     },
     {
