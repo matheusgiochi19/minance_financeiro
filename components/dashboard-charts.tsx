@@ -92,7 +92,7 @@ function LineChart({ labels, values }: { labels: string[]; values: number[] }) {
         const y = 150 - (value / max) * 120;
         return <circle cx={x} cy={y} fill="#cf66ff" key={`${labels[index]}-${value}`} r="5" />;
       })}
-      {labels.map((label, index) => <text fill="rgba(34,40,57,0.62)" fontSize="10" key={label} textAnchor="middle" x={20 + index * (260 / Math.max(labels.length - 1, 1))} y="172">{label}</text>)}
+      {labels.map((label, index) => <text className="line-chart-label" fontSize="10" key={label} textAnchor="middle" x={20 + index * (260 / Math.max(labels.length - 1, 1))} y="172">{label}</text>)}
     </svg>
   );
 }

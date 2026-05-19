@@ -10,7 +10,10 @@ type ThemeSelectProps = {
 };
 
 export function ThemeSelect({ defaultValue }: ThemeSelectProps) {
-  const [theme, setTheme] = useState<ThemePreference>(() => normalizeThemePreference(defaultValue));
+  const [theme, setTheme] = useState<ThemePreference>(() => {
+    if (typeof window === "undefined") return normalizeThemePreference(defaultValue);
+    return normalizeThemePreference(window.localStorage.getItem(THEME_STORAGE_KEY) || defaultValue);
+  });
   const [message, setMessage] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 

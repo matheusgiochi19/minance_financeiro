@@ -1561,6 +1561,14 @@ button {
   width: 100%;
 }
 
+.line-chart-label {
+  fill: rgba(34, 40, 57, 0.62);
+}
+
+.dark .line-chart-label {
+  fill: rgba(244, 239, 231, 0.72);
+}
+
 .budget-distribution {
   display: grid;
   gap: 14px;
