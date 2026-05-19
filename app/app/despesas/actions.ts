@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCompetenceDate, parseCurrency, getExpenseStatus } from "@/lib/expenses";
+import { withUiAlert } from "@/lib/ui-alert";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { withTransactionRetry } from "@/services/transaction.service";
 
@@ -66,7 +67,7 @@ export async function createDespesa(formData: FormData) {
   }
 
   revalidatePath("/app/despesas");
-  redirect("/app/despesas");
+  redirect(withUiAlert("/app/despesas", "success", "Despesa salva com sucesso."));
 }
 
 export async function updateDespesa(formData: FormData) {
@@ -98,7 +99,7 @@ export async function updateDespesa(formData: FormData) {
   }
 
   revalidatePath("/app/despesas");
-  redirect("/app/despesas");
+  redirect(withUiAlert("/app/despesas", "success", "Despesa atualizada com sucesso."));
 }
 
 export async function deleteDespesa(formData: FormData) {
@@ -117,6 +118,7 @@ export async function deleteDespesa(formData: FormData) {
   }
 
   revalidatePath("/app/despesas");
+  redirect(withUiAlert("/app/despesas", "success", "Despesa excluida com sucesso."));
 }
 
 export async function markDespesaAsPaid(formData: FormData) {
@@ -129,4 +131,5 @@ export async function markDespesaAsPaid(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await withTransactionRetry(() => supabase.rpc("mark_despesa_paid", { p_id: id }));
   revalidatePath("/app/despesas");
+  redirect(withUiAlert("/app/despesas", "success", "Despesa marcada como paga."));
 }

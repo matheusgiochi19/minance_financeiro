@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/env";
+import { withUiAlert } from "@/lib/ui-alert";
 
 type AuthState = {
   message: string;
@@ -84,11 +85,11 @@ export async function signIn(_previousState: AuthState, formData: FormData): Pro
     return { message: "Seu usuario esta bloqueado. Fale com o administrador.", type: "error" };
   }
 
-  redirect(redirectTo.startsWith("/app") ? redirectTo : "/app/dashboard");
+  redirect(withUiAlert(redirectTo.startsWith("/app") ? redirectTo : "/app/dashboard", "success", "Login realizado com sucesso."));
 }
 
 export async function signOut() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect("/login");
+  redirect(withUiAlert("/login", "success", "Logout realizado com sucesso."));
 }

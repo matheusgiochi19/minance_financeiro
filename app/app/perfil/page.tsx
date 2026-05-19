@@ -1,27 +1,19 @@
-import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
-import { AvatarUploadForm } from "@/components/avatar-upload-form";
+import { updateEmail, updatePassword, updateProfile, updateProfileTheme } from "@/app/app/perfil/actions";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { Card } from "@/components/ui/card";
-import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
-
-export const runtime = "nodejs";
+import { getCurrentProfile } from "@/lib/profiles";
 
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
-  const initial = (fullName || user?.email || "U").slice(0, 1).toUpperCase();
-  const avatarUrl = await resolveAvatarUrl(profile?.avatar_url);
+  const theme = profile?.theme_preference || profile?.tema || "light";
 
   return (
     <section className="records-page">
-      <div className="page-heading"><p>Conta</p><h1>Perfil</h1><span>Gerencie nome, acesso e avatar persistente.</span></div>
+      <div className="page-heading"><p>Conta</p><h1>Perfil</h1><span>Gerencie nome, acesso e preferencias da conta.</span></div>
       <div className="settings-grid">
         <Card className="entity-form-card">
           <h2>Identidade</h2>
-          <div className="profile-preview">
-            <div className="profile-photo profile-photo-fallback">{initial}</div>
-            <strong>{fullName || "Seu nome"}</strong>
-          </div>
           <form action={updateProfile} className="entity-form">
             <label><span>Nome completo</span><input defaultValue={fullName} name="full_name" required /></label>
             <FormSubmitButton>Salvar nome</FormSubmitButton>
@@ -36,9 +28,11 @@ export default async function PerfilPage() {
           <form action={updatePassword} className="entity-form"><label><span>Nova senha</span><input minLength={6} name="password" type="password" required /></label><FormSubmitButton>Alterar senha</FormSubmitButton></form>
         </Card>
         <Card className="entity-form-card">
-          <h2>Avatar</h2>
-          <p className="muted-copy">Use JPG, PNG ou WEBP de até 50MB. O avatar atualiza na navegação assim que o upload termina.</p>
-          <AvatarUploadForm fallbackInitial={initial} initialAvatarUrl={avatarUrl} />
+          <h2>Tema</h2>
+          <form action={updateProfileTheme} className="entity-form">
+            <label><span>Modo visual</span><select defaultValue={theme} name="theme_preference"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+            <FormSubmitButton>Salvar tema</FormSubmitButton>
+          </form>
         </Card>
       </div>
     </section>

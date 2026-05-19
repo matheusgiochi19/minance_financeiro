@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { parseCurrency } from "@/lib/expenses";
+import { withUiAlert } from "@/lib/ui-alert";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 
 export async function createOrcamento(formData: FormData) {
@@ -19,7 +20,7 @@ export async function createOrcamento(formData: FormData) {
     p_valor_limite: valor > 0 ? valor : null
   });
   revalidatePath("/app/orcamento");
-  redirect("/app/orcamento");
+  redirect(withUiAlert("/app/orcamento", "success", "Orcamento salvo com sucesso."));
 }
 
 export async function updateOrcamento(formData: FormData) {
@@ -38,7 +39,7 @@ export async function updateOrcamento(formData: FormData) {
     p_valor_limite: valor > 0 ? valor : null
   });
   revalidatePath("/app/orcamento");
-  redirect("/app/orcamento");
+  redirect(withUiAlert("/app/orcamento", "success", "Orcamento atualizado com sucesso."));
 }
 
 export async function deleteOrcamento(formData: FormData) {
@@ -48,4 +49,5 @@ export async function deleteOrcamento(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await supabase.rpc("delete_orcamento", { p_id: id });
   revalidatePath("/app/orcamento");
+  redirect(withUiAlert("/app/orcamento", "success", "Orcamento excluido com sucesso."));
 }

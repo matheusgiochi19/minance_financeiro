@@ -1,11 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { withUiAlert } from "@/lib/ui-alert";
 import { createClient } from "@/lib/supabase/server";
 
 export async function updateProfile(formData: FormData) {
   const fullName = String(formData.get("full_name") || "").trim();
-  if (!fullName) return;
+  if (!fullName) {
+    redirect(withUiAlert("/app/perfil", "error", "Informe um nome valido."));
+  }
 
   const supabase = await createClient();
   const {
@@ -17,11 +21,14 @@ export async function updateProfile(formData: FormData) {
   await supabase.from("profiles").update({ full_name: fullName }).eq("user_id", user.id);
   revalidatePath("/app", "layout");
   revalidatePath("/app/perfil");
+  redirect(withUiAlert("/app/perfil", "success", "Perfil atualizado com sucesso."));
 }
 
 export async function updateEmail(formData: FormData) {
   const email = String(formData.get("email") || "").trim().toLowerCase();
-  if (!email) return;
+  if (!email) {
+    redirect(withUiAlert("/app/perfil", "error", "Informe um e-mail valido."));
+  }
   const supabase = await createClient();
   const {
     data: { user }
@@ -32,12 +39,30 @@ export async function updateEmail(formData: FormData) {
   await supabase.from("profiles").update({ email }).eq("user_id", user.id);
   revalidatePath("/app", "layout");
   revalidatePath("/app/perfil");
+  redirect(withUiAlert("/app/perfil", "success", "E-mail atualizado com sucesso."));
 }
 
 export async function updatePassword(formData: FormData) {
   const password = String(formData.get("password") || "");
-  if (password.length < 6) return;
+  if (password.length < 6) {
+    redirect(withUiAlert("/app/perfil", "error", "A senha deve ter pelo menos 6 caracteres."));
+  }
   const supabase = await createClient();
   await supabase.auth.updateUser({ password });
   revalidatePath("/app/perfil");
+  redirect(withUiAlert("/app/perfil", "success", "Senha atualizada com sucesso."));
+}
+
+export async function updateProfileTheme(formData: FormData) {
+  const theme = String(formData.get("theme_preference") || "light") === "dark" ? "dark" : "light";
+  const supabase = await createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+  if (!user) return;
+
+  await supabase.from("profiles").update({ tema: theme, theme_preference: theme }).eq("user_id", user.id);
+  revalidatePath("/app", "layout");
+  revalidatePath("/app/perfil");
+  redirect(withUiAlert("/app/perfil", "success", "Tema atualizado com sucesso."));
 }

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getCompetenceDate, parseCurrency } from "@/lib/expenses";
+import { withUiAlert } from "@/lib/ui-alert";
 import { requireAuthenticatedUser } from "@/lib/user-data";
 import { withTransactionRetry } from "@/services/transaction.service";
 
@@ -26,7 +27,7 @@ export async function createReceita(formData: FormData) {
     p_valor: valor
   }));
   revalidatePath("/app/receitas");
-  redirect("/app/receitas");
+  redirect(withUiAlert("/app/receitas", "success", "Receita salva com sucesso."));
 }
 
 export async function updateReceita(formData: FormData) {
@@ -46,7 +47,7 @@ export async function updateReceita(formData: FormData) {
     p_valor: valor
   }));
   revalidatePath("/app/receitas");
-  redirect("/app/receitas");
+  redirect(withUiAlert("/app/receitas", "success", "Receita atualizada com sucesso."));
 }
 
 export async function deleteReceita(formData: FormData) {
@@ -56,4 +57,5 @@ export async function deleteReceita(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await withTransactionRetry(() => supabase.rpc("delete_receita", { p_id: id }));
   revalidatePath("/app/receitas");
+  redirect(withUiAlert("/app/receitas", "success", "Receita excluida com sucesso."));
 }

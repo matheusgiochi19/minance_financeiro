@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { AuthForm } from "@/components/auth-form";
+import { UrlAlertBanner } from "@/components/url-alert-banner";
 import { signIn } from "@/app/auth-actions";
 import { APP_VERSION } from "@/lib/version";
 
@@ -22,13 +23,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <section>
         <p className="eyebrow">Acesso seguro</p>
         <h1>Entrar</h1>
-        <p className="auth-subtitle">Use seu e-mail confirmado para acessar a área protegida.</p>
+        <p className="auth-subtitle">Use seu e-mail confirmado para acessar a area protegida.</p>
+        <UrlAlertBanner />
         <AuthForm
           action={signIn}
           buttonLabel="Entrar"
           footerHref="/cadastro"
           footerLabel="Criar conta"
-          footerText="Ainda não tem conta?"
+          footerText="Ainda nao tem conta?"
           redirectTo={params.redirectTo}
         />
         <p className="auth-version">{APP_VERSION}</p>

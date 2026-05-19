@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { OnboardingPanel } from "@/components/onboarding-panel";
+import { ThemeApplier } from "@/components/theme-applier";
+import { UrlAlertBanner } from "@/components/url-alert-banner";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
+import { getCurrentProfile } from "@/lib/profiles";
 
 export default async function ProtectedLayout({
   children
@@ -21,8 +23,12 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
+  const theme = profile?.theme_preference || profile?.tema || "light";
+
   return (
-    <AppShell avatarUrl={await resolveAvatarUrl(profile?.avatar_url)} fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"}>
+    <AppShell fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"} theme={theme}>
+      <ThemeApplier theme={theme} />
+      <UrlAlertBanner />
       {profile?.onboarding_hidden ? null : <OnboardingPanel />}
       {children}
     </AppShell>

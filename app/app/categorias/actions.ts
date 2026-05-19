@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { withUiAlert } from "@/lib/ui-alert";
 import { normalizeName, requireAuthenticatedUser } from "@/lib/user-data";
 import { withTransactionRetry } from "@/services/transaction.service";
 
@@ -15,7 +16,7 @@ export async function createCategoria(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await withTransactionRetry(() => supabase.rpc("create_categoria", { p_nome: nome }));
   revalidatePath("/app/categorias");
-  redirect("/app/categorias");
+  redirect(withUiAlert("/app/categorias", "success", "Categoria salva com sucesso."));
 }
 
 export async function updateCategoria(formData: FormData) {
@@ -29,7 +30,7 @@ export async function updateCategoria(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await withTransactionRetry(() => supabase.rpc("update_categoria", { p_id: id, p_nome: nome }));
   revalidatePath("/app/categorias");
-  redirect("/app/categorias");
+  redirect(withUiAlert("/app/categorias", "success", "Categoria atualizada com sucesso."));
 }
 
 export async function deleteCategoria(formData: FormData) {
@@ -42,4 +43,5 @@ export async function deleteCategoria(formData: FormData) {
   const { supabase } = await requireAuthenticatedUser();
   await withTransactionRetry(() => supabase.rpc("delete_categoria", { p_id: id }));
   revalidatePath("/app/categorias");
+  redirect(withUiAlert("/app/categorias", "success", "Categoria excluida com sucesso."));
 }
