@@ -32,7 +32,7 @@ export default async function CartoesPage({ searchParams }: CartoesPageProps) {
   const invoicePairs = await Promise.all(
     (cartoes || []).map(async (cartao) => {
       const { data } = await supabase.from("cartao_despesas").select("valor,status").eq("user_id", user.id).eq("cartao_id", cartao.id).is("deleted_at", null).gte("data_competencia", periodo.inicio).lt("data_competencia", periodo.fim).returns<Array<Pick<CartaoDespesa, "status" | "valor">>>();
-      return [cartao.id, (data || []).reduce((total, item) => (item.status === "pp" ? total : total + Number(item.valor || 0)), 0)] as const;
+      return [cartao.id, (data || []).reduce((total, item) => total + Number(item.valor || 0), 0)] as const;
     })
   );
   const invoiceTotals = new Map(invoicePairs);

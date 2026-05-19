@@ -46,7 +46,7 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
   const totalAberto = (despesas || []).reduce((total, despesa) => (despesa.status === "ab" ? total + Number(despesa.valor || 0) : total), 0);
   const totalParcial = (despesas || []).reduce((total, despesa) => (despesa.status === "p" ? total + Number(despesa.valor || 0) : total), 0);
   const totalPago = (despesas || []).reduce((total, despesa) => (despesa.status === "pp" ? total + Number(despesa.valor || 0) : total), 0);
-  const totalFatura = totalAberto + totalParcial;
+  const totalFatura = totalAberto + totalParcial + totalPago;
 
   return (
     <section className="expenses-page">
@@ -60,7 +60,7 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
       </div>
       <MonthFilter month={periodo.mes} />
       <div className="expense-summary-grid">
-        <Card className="summary-card" tone="cards"><span>Fatura em aberto</span><strong>{formatCurrency(totalFatura)}</strong></Card>
+        <Card className="summary-card" tone="cards"><span>Total fatura mês</span><strong>{formatCurrency(totalFatura)}</strong></Card>
         <Card className="summary-card" tone="expense"><span>Itens abertos</span><strong>{formatCurrency(totalAberto)}</strong></Card>
         <Card className="summary-card" tone="muted"><span>Itens parciais</span><strong>{formatCurrency(totalParcial)}</strong></Card>
         <Card className="summary-card" tone="income"><span>Itens pagos</span><strong>{formatCurrency(totalPago)}</strong></Card>

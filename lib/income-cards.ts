@@ -98,5 +98,5 @@ export async function getCurrentInvoiceTotal(cartaoId: string) {
     .lt("data_competencia", end.slice(0, 10))
     .returns<Array<{ status: CartaoDespesa["status"]; valor: number }>>();
 
-  return (data || []).reduce((total, item) => (item.status === "pp" ? total : total + Number(item.valor || 0)), 0);
+  return (data || []).reduce((total, item) => total + Number(item.valor || 0), 0);
 }

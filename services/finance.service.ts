@@ -43,12 +43,16 @@ export const calcularTotalDespesas = cache(async (userId: string, periodo: Perio
 export const calcularFaturaCartao = cache(async (userId: string, mes: string) => {
   const supabase = await createClient();
   const periodo = getPeriodoMes(mes);
-  const { data } = await supabase.rpc("calcular_fatura_cartao", {
-    p_fim: periodo.fim,
-    p_inicio: periodo.inicio,
-    p_user_id: userId
-  });
-  return Number(data || 0);
+  const { data } = await supabase
+    .from("cartao_despesas")
+    .select("valor")
+    .eq("user_id", userId)
+    .is("deleted_at", null)
+    .gte("data_competencia", periodo.inicio)
+    .lt("data_competencia", periodo.fim)
+    .returns<Array<{ valor: number }>>();
+
+  return (data || []).reduce((total, item) => total + Number(item.valor || 0), 0);
 });
 
 export const calcularSaldo = cache(async (userId: string, periodo: PeriodoFinanceiro & { mes?: string }) => {
