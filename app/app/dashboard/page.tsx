@@ -18,7 +18,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
       <div className="welcome">
         <p>Boas-vindas</p>
         <h1>{displayName}</h1>
-        <span>Visão consolidada entre mês passado, mês atual e próximos 4 meses.</span>
+        <span>Visao consolidada do periodo selecionado.</span>
       </div>
       <MonthFilter month={periodo.mes} />
 
@@ -26,10 +26,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
         <Card className="summary-card" tone="muted"><span>Saldo Atual</span><strong>{data.formatted.saldo}</strong></Card>
         <Card className="summary-card" tone="income"><span>Receitas</span><strong>{data.formatted.receitas}</strong></Card>
         <Card className="summary-card" tone="expense"><span>Despesas</span><strong>{data.formatted.despesas}</strong></Card>
-        <Card className="summary-card" tone="cards"><span>Fatura Cartões</span><strong>{data.formatted.faturas}</strong></Card>
+        <Card className="summary-card" tone="cards"><span>Fatura Cartoes</span><strong>{data.formatted.faturas}</strong></Card>
       </div>
 
-      <DashboardCharts categories={data.categories} months={data.months} series={data.series} />
+      <DashboardCharts categories={data.categories} insights={data.insights} months={data.months} series={data.series} />
     </section>
   );
 }

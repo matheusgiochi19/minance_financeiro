@@ -406,6 +406,17 @@ button {
   gap: 8px;
 }
 
+.privacy-consent {
+  align-items: center;
+  display: flex !important;
+  gap: 10px;
+}
+
+.privacy-consent input {
+  min-height: auto;
+  width: 18px;
+}
+
 .auth-card label span {
   font-size: 14px;
   font-weight: 800;
@@ -1568,6 +1579,64 @@ button {
 
 .dark .line-chart-label {
   fill: rgba(244, 239, 231, 0.72);
+}
+
+.insight-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.insight-grid article,
+.dominant-card,
+.trend-list span {
+  background: rgba(255, 255, 255, 0.48);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 12px;
+}
+
+.insight-grid span,
+.dominant-card span,
+.trend-list b,
+.empty-copy {
+  color: #4a5364;
+  font-size: 12px;
+}
+
+.insight-grid strong,
+.dominant-card strong,
+.trend-list strong {
+  font-size: 18px;
+}
+
+.trend-list {
+  display: grid;
+  gap: 8px;
+}
+
+.trend-list span {
+  grid-template-columns: 50px 1fr auto;
+}
+
+.dominant-card small {
+  color: var(--terracotta);
+  font-weight: 900;
+}
+
+.dark .insight-grid article,
+.dark .dominant-card,
+.dark .trend-list span {
+  background: rgba(244, 239, 231, 0.08);
+}
+
+.dark .insight-grid span,
+.dark .dominant-card span,
+.dark .trend-list b,
+.dark .empty-copy {
+  color: rgba(244, 239, 231, 0.72);
 }
 
 .budget-distribution {

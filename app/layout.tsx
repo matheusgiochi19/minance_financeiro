@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeBoot } from "@/components/theme-boot";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,11 +20,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem("minance-theme");if(t==="dark"){document.documentElement.classList.add("dark");document.body.classList.add("dark");document.documentElement.dataset.theme="dark";document.body.dataset.theme="dark";}}catch(e){}`
-          }}
-        />
+        <ThemeBoot />
         {children}
       </body>
     </html>

@@ -1,4 +1,5 @@
-import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
+import { requestAccountDeletion, updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { ThemeSelect } from "@/components/theme-select";
 import { Card } from "@/components/ui/card";
@@ -34,6 +35,14 @@ export default async function PerfilPage() {
           <div className="entity-form">
             <label><span>Modo visual</span><ThemeSelect defaultValue={theme} key={theme} /></label>
           </div>
+        </Card>
+        <Card className="entity-form-card">
+          <h2>Privacidade</h2>
+          <form action={requestAccountDeletion} className="entity-form">
+            <p className="muted-copy">Para remover seus dados financeiros e encerrar o acesso, digite EXCLUIR.</p>
+            <label><span>Confirmacao</span><input maxLength={7} name="confirmation" placeholder="EXCLUIR" required /></label>
+            <ConfirmSubmitButton message="Remover seus dados financeiros e sair da conta?">Solicitar exclusao</ConfirmSubmitButton>
+          </form>
         </Card>
       </div>
     </section>

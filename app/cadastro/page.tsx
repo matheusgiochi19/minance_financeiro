@@ -13,7 +13,7 @@ export default function CadastroPage() {
       <section>
         <p className="eyebrow">Primeiro acesso</p>
         <h1>Cadastro</h1>
-        <p className="auth-subtitle">Crie sua conta e confirme o e-mail enviado pelo Supabase.</p>
+        <p className="auth-subtitle">Crie sua conta e confirme o e-mail para acessar seu painel.</p>
         <AuthForm
           action={signUp}
           buttonLabel="Cadastrar"

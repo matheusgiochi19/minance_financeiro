@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSiteUrl } from "@/lib/env";
+import { sanitizeText } from "@/lib/security";
 import { withUiAlert } from "@/lib/ui-alert";
 
 type AuthState = {
@@ -11,12 +12,17 @@ type AuthState = {
 };
 
 export async function signUp(_previousState: AuthState, formData: FormData): Promise<AuthState> {
-  const fullName = String(formData.get("full_name") || "").trim();
+  const fullName = sanitizeText(formData.get("full_name"));
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const password = String(formData.get("password") || "");
+  const privacyAccepted = formData.get("privacy_accepted") === "yes";
 
   if (!fullName || !email || !password) {
     return { message: "Informe nome completo, e-mail e senha.", type: "error" };
+  }
+
+  if (!privacyAccepted) {
+    return { message: "Aceite a Política de Privacidade para continuar.", type: "error" };
   }
 
   if (password.length < 6) {
@@ -43,6 +49,8 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
     await supabase.from("profiles").upsert({
       email,
       full_name: fullName,
+      privacy_accepted: true,
+      privacy_accepted_at: new Date().toISOString(),
       user_id: data.user.id
     }, { onConflict: "user_id" });
   }

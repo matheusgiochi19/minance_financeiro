@@ -38,17 +38,23 @@ export function AuthForm({
       {includeFullName ? (
         <label>
           <span>Nome completo</span>
-          <input autoComplete="name" name="full_name" placeholder="Seu nome completo" required />
+          <input autoComplete="name" maxLength={120} name="full_name" placeholder="Seu nome completo" required />
         </label>
       ) : null}
       <label>
         <span>E-mail</span>
-        <input autoComplete="email" name="email" placeholder="seu@email.com" required type="email" />
+        <input autoComplete="email" maxLength={160} name="email" placeholder="seu@email.com" required type="email" />
       </label>
       <label>
         <span>Senha</span>
         <input autoComplete="current-password" minLength={6} name="password" placeholder="********" required type="password" />
       </label>
+      {includeFullName ? (
+        <label className="privacy-consent">
+          <input name="privacy_accepted" required type="checkbox" value="yes" />
+          <span>Li e aceito a Política de Privacidade</span>
+        </label>
+      ) : null}
       <Button disabled={isPending} type="submit">
         {isPending ? <Loader2 aria-hidden className="spin" size={18} /> : null}
         {buttonLabel}
