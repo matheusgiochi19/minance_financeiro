@@ -4,7 +4,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { withUiAlert } from "@/lib/ui-alert";
 import { createClient } from "@/lib/supabase/server";
-import { normalizeThemePreference } from "@/lib/theme";
 
 export async function updateProfile(formData: FormData) {
   const fullName = String(formData.get("full_name") || "").trim();
@@ -52,31 +51,4 @@ export async function updatePassword(formData: FormData) {
   await supabase.auth.updateUser({ password });
   revalidatePath("/app/perfil");
   redirect(withUiAlert("/app/perfil", "success", "Senha atualizada com sucesso."));
-}
-
-export async function updateProfileTheme(formData: FormData) {
-  const theme = normalizeThemePreference(formData.get("theme_preference"));
-  const supabase = await createClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) return;
-
-  const { data: updatedProfile, error } = await supabase
-    .from("profiles")
-    .update({ theme_preference: theme })
-    .or(`user_id.eq.${user.id},id.eq.${user.id}`)
-    .select("theme_preference")
-    .maybeSingle();
-  if (error || !updatedProfile) {
-    redirect(withUiAlert("/app/perfil", "error", `Nao foi possivel salvar o tema: ${error?.message || "perfil nao encontrado"}`));
-  }
-
-  if (normalizeThemePreference(updatedProfile.theme_preference) !== theme) {
-    redirect(withUiAlert("/app/perfil", "error", "Tema nao foi persistido no perfil."));
-  }
-
-  revalidatePath("/app", "layout");
-  revalidatePath("/app/perfil");
-  redirect(withUiAlert("/app/perfil", "success", "Tema atualizado com sucesso."));
 }

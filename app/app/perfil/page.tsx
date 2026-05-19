@@ -1,4 +1,4 @@
-import { updateEmail, updatePassword, updateProfile, updateProfileTheme } from "@/app/app/perfil/actions";
+import { updateEmail, updatePassword, updateProfile } from "@/app/app/perfil/actions";
 import { FormSubmitButton } from "@/components/form-submit-button";
 import { ThemeSelect } from "@/components/theme-select";
 import { Card } from "@/components/ui/card";
@@ -31,10 +31,9 @@ export default async function PerfilPage() {
         </Card>
         <Card className="entity-form-card">
           <h2>Tema</h2>
-          <form action={updateProfileTheme} className="entity-form">
+          <div className="entity-form">
             <label><span>Modo visual</span><ThemeSelect defaultValue={theme} key={theme} /></label>
-            <FormSubmitButton>Salvar tema</FormSubmitButton>
-          </form>
+          </div>
         </Card>
       </div>
     </section>

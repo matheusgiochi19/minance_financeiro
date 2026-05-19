@@ -368,6 +368,32 @@ button {
   background: rgba(244, 239, 231, 0.1);
 }
 
+.dark .welcome span,
+.dark .page-heading span,
+.dark .admin-alert,
+.dark .bar-month span,
+.dark .legend,
+.dark .invoice-row,
+.dark .pie-panel h2,
+.dark .invoice-panel h2,
+.dark .bar-panel h2,
+.dark .chart-legend-grid span,
+.dark .empty-chart,
+.dark .chart-lazy-placeholder,
+.dark .budget-card span,
+.dark .budget-card p,
+.dark .muted-copy,
+.dark .error-state span,
+.dark .empty-cell,
+.dark .current-attachment,
+.dark .chart-scale {
+  color: rgba(244, 239, 231, 0.72);
+}
+
+.dark .clean-expenses-table td {
+  background: rgba(244, 239, 231, 0.06);
+}
+
 .dark .ui-table-wrap,
 .dark .summary-card,
 .dark .bank-card {
@@ -1123,6 +1149,20 @@ button {
 .expense-edit-form select:focus {
   border-color: var(--terracotta);
   box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
+}
+
+.theme-select-wrap {
+  display: grid;
+  gap: 8px;
+}
+
+.theme-save-status {
+  color: var(--terracotta);
+  min-height: 16px;
+}
+
+.theme-save-status.success {
+  color: var(--green);
 }
 
 .form-actions {
