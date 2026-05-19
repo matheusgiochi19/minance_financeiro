@@ -5,6 +5,7 @@ import { ThemeApplier } from "@/components/theme-applier";
 import { UrlAlertBanner } from "@/components/url-alert-banner";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/profiles";
+import { normalizeThemePreference } from "@/lib/theme";
 
 export default async function ProtectedLayout({
   children
@@ -23,7 +24,7 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  const theme = profile?.theme_preference || "light";
+  const theme = normalizeThemePreference(profile?.theme_preference);
 
   return (
     <AppShell fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"} theme={theme}>

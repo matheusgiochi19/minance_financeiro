@@ -1,12 +1,14 @@
 import { updateEmail, updatePassword, updateProfile, updateProfileTheme } from "@/app/app/perfil/actions";
 import { FormSubmitButton } from "@/components/form-submit-button";
+import { ThemeSelect } from "@/components/theme-select";
 import { Card } from "@/components/ui/card";
 import { getCurrentProfile } from "@/lib/profiles";
+import { normalizeThemePreference } from "@/lib/theme";
 
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
-  const theme = profile?.theme_preference || "light";
+  const theme = normalizeThemePreference(profile?.theme_preference);
 
   return (
     <section className="records-page">
@@ -30,7 +32,7 @@ export default async function PerfilPage() {
         <Card className="entity-form-card">
           <h2>Tema</h2>
           <form action={updateProfileTheme} className="entity-form">
-            <label><span>Modo visual</span><select defaultValue={theme} name="theme_preference"><option value="light">Light</option><option value="dark">Dark</option></select></label>
+            <label><span>Modo visual</span><ThemeSelect defaultValue={theme} key={theme} /></label>
             <FormSubmitButton>Salvar tema</FormSubmitButton>
           </form>
         </Card>

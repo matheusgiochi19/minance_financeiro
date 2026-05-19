@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { applyThemePreference, normalizeThemePreference, THEME_STORAGE_KEY } from "@/lib/theme";
 
 type ThemeApplierProps = {
   theme: "light" | "dark";
@@ -8,8 +9,9 @@ type ThemeApplierProps = {
 
 export function ThemeApplier({ theme }: ThemeApplierProps) {
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    document.body.classList.toggle("dark", theme === "dark");
+    const normalizedTheme = normalizeThemePreference(theme);
+    applyThemePreference(normalizedTheme);
+    window.localStorage.setItem(THEME_STORAGE_KEY, normalizedTheme);
   }, [theme]);
 
   return null;
