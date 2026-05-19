@@ -3,36 +3,27 @@
 import { X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
-import type { FlashType } from "@/lib/flash";
+import { uiAlertLabels, type UiAlertType } from "@/lib/ui-alert";
 
 type AlertBannerProps = {
   className?: string;
-  clearOnMount?: boolean;
   message: string;
   onDismiss?: () => void;
-  persisted?: boolean;
-  type: FlashType;
+  type: UiAlertType;
 };
 
-export function AlertBanner({ className, clearOnMount = false, message, onDismiss, persisted = false, type }: AlertBannerProps) {
+export function AlertBanner({ className, message, onDismiss, type }: AlertBannerProps) {
   const [visible, setVisible] = useState(true);
 
-  const dismiss = useCallback(async () => {
+  const dismiss = useCallback(() => {
     setVisible(false);
     onDismiss?.();
-    if (!persisted) return;
-    await fetch("/api/flash", { method: "DELETE" }).catch(() => undefined);
-  }, [onDismiss, persisted]);
-
-  useEffect(() => {
-    if (!persisted || !clearOnMount) return;
-    void fetch("/api/flash", { method: "DELETE" }).catch(() => undefined);
-  }, [clearOnMount, persisted]);
+  }, [onDismiss]);
 
   useEffect(() => {
     if (!visible) return;
     const timeoutId = window.setTimeout(() => {
-      void dismiss();
+      dismiss();
     }, 10_000);
 
     return () => window.clearTimeout(timeoutId);
@@ -48,12 +39,13 @@ export function AlertBanner({ className, clearOnMount = false, message, onDismis
       className={cn("alert-banner", `alert-banner-${type}`, !visible && "is-hidden", className)}
       role={type === "error" ? "alert" : "status"}
     >
+      <strong>{uiAlertLabels[type]}</strong>
       <p>{message}</p>
       <button
         aria-label="Fechar mensagem"
         className="alert-banner-close"
         onClick={() => {
-          void dismiss();
+          dismiss();
         }}
         type="button"
       >

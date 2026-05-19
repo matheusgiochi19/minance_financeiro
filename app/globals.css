@@ -535,12 +535,21 @@ button {
   line-height: 1.45;
 }
 
+.alert-banner strong {
+  flex: 0 0 auto;
+}
+
 .alert-banner-success {
   background: #4f7d25;
 }
 
 .alert-banner-error {
   background: #c45a3d;
+}
+
+.alert-banner-warning {
+  background: var(--orange);
+  color: var(--ink);
 }
 
 .alert-banner-close {

@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
-import { FlashBanner } from "@/components/flash-banner";
 import { OnboardingPanel } from "@/components/onboarding-panel";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile, resolveAvatarUrl } from "@/lib/profiles";
@@ -24,7 +23,6 @@ export default async function ProtectedLayout({
 
   return (
     <AppShell avatarUrl={await resolveAvatarUrl(profile?.avatar_url)} fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"}>
-      <FlashBanner />
       {profile?.onboarding_hidden ? null : <OnboardingPanel />}
       {children}
     </AppShell>
