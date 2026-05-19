@@ -18,7 +18,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body>{children}</body>
+      <body>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem("minance-theme");if(t==="dark"){document.documentElement.classList.add("dark");document.body.classList.add("dark");document.documentElement.dataset.theme="dark";document.body.dataset.theme="dark";}}catch(e){}`
+          }}
+        />
+        {children}
+      </body>
     </html>
   );
 }

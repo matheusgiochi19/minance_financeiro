@@ -11,6 +11,6 @@ export async function hideOnboarding() {
 
   if (!user) return;
 
-  await supabase.from("profiles").update({ onboarding_hidden: true }).eq("user_id", user.id);
-  revalidatePath("/app/dashboard");
+  await supabase.from("profiles").update({ onboarding_hidden: true }).or(`user_id.eq.${user.id},id.eq.${user.id}`);
+  revalidatePath("/app", "layout");
 }

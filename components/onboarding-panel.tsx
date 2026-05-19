@@ -1,12 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckCircle2, X } from "lucide-react";
 import { hideOnboarding } from "@/app/app/onboarding-actions";
 
+const ONBOARDING_SESSION_KEY = "minance-onboarding-seen-session";
+
 export function OnboardingPanel() {
-  const [hidden, setHidden] = useState(false);
+  const [hidden, setHidden] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return window.sessionStorage.getItem(ONBOARDING_SESSION_KEY) === "true";
+  });
+
+  useEffect(() => {
+    if (hidden) return;
+    window.sessionStorage.setItem(ONBOARDING_SESSION_KEY, "true");
+    const timer = window.setTimeout(() => setHidden(true), 10000);
+    return () => window.clearTimeout(timer);
+  }, [hidden]);
 
   if (hidden) return null;
 

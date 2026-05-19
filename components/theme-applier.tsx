@@ -9,7 +9,8 @@ type ThemeApplierProps = {
 
 export function ThemeApplier({ theme }: ThemeApplierProps) {
   useEffect(() => {
-    const normalizedTheme = normalizeThemePreference(theme);
+    const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+    const normalizedTheme = normalizeThemePreference(storedTheme || theme);
     applyThemePreference(normalizedTheme);
     window.localStorage.setItem(THEME_STORAGE_KEY, normalizedTheme);
   }, [theme]);

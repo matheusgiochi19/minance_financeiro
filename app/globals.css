@@ -1,4 +1,5 @@
 :root {
+  --cor_escura_secundaria: #1b2632;
   --ink: #222839;
   --navy: #293b50;
   --navy-dark: #1d2433;
@@ -20,7 +21,7 @@
   --navy: #203247;
   --navy-dark: #111827;
   --terracotta: #d07458;
-  --paper: #151923;
+  --paper: var(--cor_escura_secundaria);
   --line: rgba(244, 239, 231, 0.16);
   --muted-card: rgba(244, 239, 231, 0.14);
   --green-card: rgba(109, 140, 93, 0.22);
