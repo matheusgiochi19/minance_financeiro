@@ -5,7 +5,7 @@ import { getCurrentProfile } from "@/lib/profiles";
 
 export default async function ConfiguracoesPage() {
   const { profile } = await getCurrentProfile();
-  const theme = profile?.theme_preference || profile?.tema || "light";
+  const theme = profile?.theme_preference || "light";
 
   return (
     <section className="records-page">

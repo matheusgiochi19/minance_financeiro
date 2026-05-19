@@ -13,7 +13,6 @@ export type Profile = {
   ativo: boolean;
   juros_atraso: number | null;
   onboarding_hidden: boolean;
-  tema: ThemePreference;
   theme_preference: ThemePreference | null;
   created_at: string;
   updated_at: string;
@@ -31,7 +30,7 @@ export async function getCurrentProfile() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("id,user_id,email,full_name,role,ativo,juros_atraso,onboarding_hidden,tema,theme_preference,created_at,updated_at")
+    .select("id,user_id,email,full_name,role,ativo,juros_atraso,onboarding_hidden,theme_preference,created_at,updated_at")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
     .maybeSingle<Profile>();
 

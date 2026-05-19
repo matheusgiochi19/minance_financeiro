@@ -6,7 +6,7 @@ import { getCurrentProfile } from "@/lib/profiles";
 export default async function PerfilPage() {
   const { user, profile } = await getCurrentProfile();
   const fullName = profile?.full_name || user?.user_metadata?.full_name || "";
-  const theme = profile?.theme_preference || profile?.tema || "light";
+  const theme = profile?.theme_preference || "light";
 
   return (
     <section className="records-page">

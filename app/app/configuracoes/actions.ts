@@ -15,7 +15,7 @@ export async function updateConfiguracoes(formData: FormData) {
   if (!user) return;
   const { error } = await supabase
     .from("profiles")
-    .update({ juros_atraso: juros >= 0 ? juros : 0, tema: theme, theme_preference: theme })
+    .update({ juros_atraso: juros >= 0 ? juros : 0, theme_preference: theme })
     .or(`user_id.eq.${user.id},id.eq.${user.id}`);
   if (error) {
     redirect(withUiAlert("/app/configuracoes", "error", `Nao foi possivel salvar as configuracoes: ${error.message}`));
@@ -23,10 +23,10 @@ export async function updateConfiguracoes(formData: FormData) {
 
   const { data: savedProfile, error: readError } = await supabase
     .from("profiles")
-    .select("tema,theme_preference")
+    .select("theme_preference")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
     .maybeSingle();
-  if (readError || !savedProfile || (savedProfile.theme_preference || savedProfile.tema) !== theme) {
+  if (readError || !savedProfile || savedProfile.theme_preference !== theme) {
     redirect(withUiAlert("/app/configuracoes", "error", "Tema nao foi persistido no perfil."));
   }
 

@@ -23,7 +23,7 @@ export default async function ProtectedLayout({
     redirect("/login");
   }
 
-  const theme = profile?.theme_preference || profile?.tema || "light";
+  const theme = profile?.theme_preference || "light";
 
   return (
     <AppShell fullName={profile?.full_name || user.user_metadata?.full_name || user.email} role={profile?.role || "user"} theme={theme}>

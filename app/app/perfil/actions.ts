@@ -61,17 +61,17 @@ export async function updateProfileTheme(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return;
 
-  const { error } = await supabase.from("profiles").update({ tema: theme, theme_preference: theme }).or(`user_id.eq.${user.id},id.eq.${user.id}`);
+  const { error } = await supabase.from("profiles").update({ theme_preference: theme }).or(`user_id.eq.${user.id},id.eq.${user.id}`);
   if (error) {
     redirect(withUiAlert("/app/perfil", "error", `Nao foi possivel salvar o tema: ${error.message}`));
   }
 
   const { data: savedProfile, error: readError } = await supabase
     .from("profiles")
-    .select("tema,theme_preference")
+    .select("theme_preference")
     .or(`user_id.eq.${user.id},id.eq.${user.id}`)
     .maybeSingle();
-  if (readError || !savedProfile || (savedProfile.theme_preference || savedProfile.tema) !== theme) {
+  if (readError || !savedProfile || savedProfile.theme_preference !== theme) {
     redirect(withUiAlert("/app/perfil", "error", "Tema nao foi persistido no perfil."));
   }
 
