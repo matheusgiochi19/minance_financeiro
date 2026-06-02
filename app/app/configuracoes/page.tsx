@@ -3,6 +3,7 @@ import { FormSubmitButton } from "@/components/form-submit-button";
 import { ThemeSelect } from "@/components/theme-select";
 import { Card } from "@/components/ui/card";
 import { getCurrentProfile } from "@/lib/profiles";
+import { APP_VERSION } from "@/lib/version";
 import { normalizeThemePreference } from "@/lib/theme";
 
 export default async function ConfiguracoesPage() {
@@ -19,6 +20,7 @@ export default async function ConfiguracoesPage() {
           <label><span>Tema</span><ThemeSelect defaultValue={theme} key={theme} /></label>
           <FormSubmitButton>Salvar</FormSubmitButton>
         </form>
+        <p className="settings-version">{APP_VERSION}</p>
       </Card>
     </section>
   );

@@ -1163,6 +1163,92 @@ button {
   box-shadow: 0 0 0 3px rgba(173, 86, 62, 0.14);
 }
 
+.repeat-field {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.repeat-field input {
+  max-width: 120px;
+}
+
+.recurrence-badge {
+  background: rgba(173, 86, 62, 0.12);
+  border-radius: 999px;
+  color: var(--terracotta);
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 900;
+  margin-left: 10px;
+  padding: 4px 10px;
+}
+
+.recurrence-dialog {
+  align-items: center;
+  background: rgba(27, 38, 50, 0.42);
+  border: 0;
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  margin: 0;
+  max-height: none;
+  max-width: none;
+  padding: 24px;
+  position: fixed;
+  width: 100%;
+  z-index: 50;
+}
+
+.recurrence-dialog-inline {
+  background: transparent;
+  inset: auto;
+  padding: 0;
+  position: static;
+  width: 100%;
+  z-index: auto;
+}
+
+.recurrence-dialog-panel {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 22px 48px rgba(27, 38, 50, 0.26);
+  max-width: 520px;
+  padding: 22px;
+  width: min(520px, 100%);
+}
+
+.recurrence-dialog-inline .recurrence-dialog-panel {
+  max-width: none;
+  width: 100%;
+}
+
+.recurrence-dialog-panel h3 {
+  font-size: 22px;
+  margin: 0 0 10px;
+}
+
+.recurrence-dialog-panel p {
+  color: #4a5364;
+  margin: 0;
+}
+
+.recurrence-dialog-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.settings-version {
+  color: rgba(27, 38, 50, 0.62);
+  font-size: 12px;
+  font-weight: 900;
+  margin: 18px 0 0;
+}
+
 .theme-select-wrap {
   display: grid;
   gap: 8px;

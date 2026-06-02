@@ -16,6 +16,7 @@ export type Expense = {
   status: ExpenseStatus;
   categoria_id: string | null;
   bolso_id: string | null;
+  recurrence_group_id: string | null;
   user_id: string;
   anexo_path: string | null;
   anexo_nome: string | null;
@@ -70,7 +71,7 @@ export async function getUserExpense(id: string) {
 
   return supabase
     .from("despesas")
-    .select("id,descricao,valor,status,categoria_id,bolso_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,status,categoria_id,bolso_id,recurrence_group_id,user_id,anexo_path,anexo_nome,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
     .is("deleted_at", null)

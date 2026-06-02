@@ -4,6 +4,7 @@ import { deleteCartaoDespesa } from "@/app/app/cartoes/actions";
 import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { MonthFilter } from "@/components/month-filter";
 import { Pagination } from "@/components/pagination";
+import { RecurrenceActionDialog, RecurrenceBadge } from "@/components/recurrence-action-dialog";
 import { AlertBanner } from "@/components/ui/alert-banner";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
@@ -33,7 +34,7 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
   const supabase = await createClient();
   const { count, data: despesas, error } = await supabase
     .from("cartao_despesas")
-    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,categorias(nome)", { count: "exact" })
+    .select("id,cartao_id,descricao,valor,status,categoria_id,recurrence_group_id,user_id,data_competencia,categorias(nome)", { count: "exact" })
     .eq("cartao_id", id)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -80,25 +81,50 @@ export default async function CartaoDespesasPage({ params, searchParams }: Carta
           </TableHead>
           <TableBody>
             {(despesas || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={6}>Nenhuma despesa neste cartao.</TableCell></TableRow> : null}
-            {(despesas || []).map((despesa) => (
-              <TableRow key={despesa.id}>
-                <TableCell><span className={`status-pill expense-status-${despesa.status as ExpenseStatus}`}>{cardExpenseStatusLabels[despesa.status]}</span></TableCell>
-                <TableCell>{new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(despesa.data_competencia))}</TableCell>
-                <TableCell><strong>{despesa.descricao}</strong></TableCell>
-                <TableCell>{despesa.categorias?.nome || "-"}</TableCell>
-                <TableCell>{formatCurrency(despesa.valor)}</TableCell>
-                <TableCell>
-                  <div className="table-actions">
-                    <Link className="table-link-button" href={`/app/cartoes/${id}/despesas/${despesa.id}/editar`}>Editar</Link>
-                    <form action={deleteCartaoDespesa}>
-                      <input name="id" type="hidden" value={despesa.id} />
-                      <input name="cartao_id" type="hidden" value={id} />
-                      <ConfirmSubmitButton message={`Excluir a despesa "${despesa.descricao}"?`}>Excluir</ConfirmSubmitButton>
-                    </form>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
+            {(despesas || []).map((despesa) => {
+              const deleteFormId = `delete-cartao-despesa-${despesa.id}`;
+              const recurring = Boolean(despesa.recurrence_group_id);
+              return (
+                <TableRow key={despesa.id}>
+                  <TableCell><span className={`status-pill expense-status-${despesa.status as ExpenseStatus}`}>{cardExpenseStatusLabels[despesa.status]}</span></TableCell>
+                  <TableCell>{new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" }).format(new Date(despesa.data_competencia))}</TableCell>
+                  <TableCell>
+                    <strong>{despesa.descricao}</strong>
+                    {recurring ? <RecurrenceBadge /> : null}
+                  </TableCell>
+                  <TableCell>{despesa.categorias?.nome || "-"}</TableCell>
+                  <TableCell>{formatCurrency(despesa.valor)}</TableCell>
+                  <TableCell>
+                    <div className="table-actions">
+                      <Link className="table-link-button" href={`/app/cartoes/${id}/despesas/${despesa.id}/editar`}>Editar</Link>
+                      {recurring ? (
+                        <>
+                          <form action={deleteCartaoDespesa} id={deleteFormId}>
+                            <input name="id" type="hidden" value={despesa.id} />
+                            <input name="cartao_id" type="hidden" value={id} />
+                            <input name="recurrence_group_id" type="hidden" value={despesa.recurrence_group_id || ""} />
+                          </form>
+                          <RecurrenceActionDialog
+                            allLabel="Excluir todos os lancamentos recorrentes"
+                            description="Escolha se deseja excluir somente este lancamento ou todo o grupo recorrente."
+                            formId={deleteFormId}
+                            singleLabel="Excluir somente este lancamento"
+                            title="Excluir lancamento recorrente"
+                            variant="delete"
+                          />
+                        </>
+                      ) : (
+                        <form action={deleteCartaoDespesa}>
+                          <input name="id" type="hidden" value={despesa.id} />
+                          <input name="cartao_id" type="hidden" value={id} />
+                          <ConfirmSubmitButton message={`Excluir a despesa "${despesa.descricao}"?`}>Excluir</ConfirmSubmitButton>
+                        </form>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </TableWrap>

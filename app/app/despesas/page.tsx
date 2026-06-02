@@ -4,6 +4,7 @@ import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { FinancialFilters } from "@/components/financial-filters";
 import { MonthFilter } from "@/components/month-filter";
 import { Pagination } from "@/components/pagination";
+import { RecurrenceActionDialog, RecurrenceBadge } from "@/components/recurrence-action-dialog";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableWrap } from "@/components/ui/table";
@@ -35,7 +36,7 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
 
   let query = supabase
     .from("despesas")
-    .select("id,descricao,valor,status,categoria_id,bolso_id,anexo_path,anexo_nome,data_competencia,categorias(nome),bolsos(nome)", { count: "exact" })
+    .select("id,descricao,valor,status,categoria_id,bolso_id,recurrence_group_id,anexo_path,anexo_nome,data_competencia,categorias(nome),bolsos(nome)", { count: "exact" })
     .eq("user_id", user.id)
     .is("deleted_at", null)
     .gte("data_competencia", periodo.inicio)
@@ -106,11 +107,16 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
             {(expenses || []).length === 0 ? <TableRow><TableCell className="empty-cell" colSpan={8}>Nenhuma despesa encontrada.</TableCell></TableRow> : null}
             {(expenses || []).map((expense) => {
               const attachmentUrl = attachmentUrls.get(expense.id);
+              const deleteFormId = `delete-despesa-${expense.id}`;
+              const recurring = Boolean(expense.recurrence_group_id);
               return (
                 <TableRow key={expense.id}>
                   <TableCell><span className={`status-pill expense-status-${expense.status}`}>{expenseStatusLabels[expense.status]}</span></TableCell>
                   <TableCell>{new Intl.DateTimeFormat("pt-BR").format(new Date(`${expense.data_competencia}T00:00:00`))}</TableCell>
-                  <TableCell><strong>{expense.descricao}</strong></TableCell>
+                  <TableCell>
+                    <strong>{expense.descricao}</strong>
+                    {recurring ? <RecurrenceBadge /> : null}
+                  </TableCell>
                   <TableCell>{expense.categorias?.nome || "-"}</TableCell>
                   <TableCell>{expense.bolsos?.nome || "-"}</TableCell>
                   <TableCell>{formatCurrency(expense.valor)}</TableCell>
@@ -122,11 +128,29 @@ export default async function DespesasPage({ searchParams }: DespesasPageProps) 
                         <input name="id" type="hidden" value={expense.id} />
                         <Button disabled={expense.status === "pp"} size="sm" type="submit" variant="secondary">Pago</Button>
                       </form>
-                      <form action={deleteDespesa}>
-                        <input name="id" type="hidden" value={expense.id} />
-                        <input name="anexo_path" type="hidden" value={expense.anexo_path || ""} />
-                        <ConfirmSubmitButton message={`Excluir a despesa "${expense.descricao}"?`}>Excluir</ConfirmSubmitButton>
-                      </form>
+                      {recurring ? (
+                        <>
+                          <form action={deleteDespesa} id={deleteFormId}>
+                            <input name="id" type="hidden" value={expense.id} />
+                            <input name="anexo_path" type="hidden" value={expense.anexo_path || ""} />
+                            <input name="recurrence_group_id" type="hidden" value={expense.recurrence_group_id || ""} />
+                          </form>
+                          <RecurrenceActionDialog
+                            allLabel="Excluir todos os lancamentos recorrentes"
+                            description="Escolha se deseja excluir somente este lancamento ou todo o grupo recorrente."
+                            formId={deleteFormId}
+                            singleLabel="Excluir somente este lancamento"
+                            title="Excluir lancamento recorrente"
+                            variant="delete"
+                          />
+                        </>
+                      ) : (
+                        <form action={deleteDespesa}>
+                          <input name="id" type="hidden" value={expense.id} />
+                          <input name="anexo_path" type="hidden" value={expense.anexo_path || ""} />
+                          <ConfirmSubmitButton message={`Excluir a despesa "${expense.descricao}"?`}>Excluir</ConfirmSubmitButton>
+                        </form>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>

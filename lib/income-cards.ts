@@ -7,6 +7,7 @@ export type Receita = {
   valor: number;
   categoria_id: string | null;
   bolso_id: string | null;
+  recurrence_group_id: string | null;
   user_id: string;
   data_competencia: string;
   created_at: string;
@@ -32,6 +33,7 @@ export type CartaoDespesa = {
   valor: number;
   status: "p" | "pp" | "ab";
   categoria_id: string | null;
+  recurrence_group_id: string | null;
   user_id: string;
   data_competencia: string;
   created_at: string;
@@ -54,7 +56,7 @@ export async function getUserReceita(id: string) {
   const { supabase, user } = await requireAuthenticatedUser();
   return supabase
     .from("receitas")
-    .select("id,descricao,valor,categoria_id,bolso_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
+    .select("id,descricao,valor,categoria_id,bolso_id,recurrence_group_id,user_id,data_competencia,created_at,updated_at,categorias(nome),bolsos(nome)")
     .eq("id", id)
     .eq("user_id", user.id)
     .is("deleted_at", null)
@@ -76,7 +78,7 @@ export async function getUserCartaoDespesa(cartaoId: string, despesaId: string) 
   const { supabase, user } = await requireAuthenticatedUser();
   return supabase
     .from("cartao_despesas")
-    .select("id,cartao_id,descricao,valor,status,categoria_id,user_id,data_competencia,created_at,updated_at,categorias(nome)")
+    .select("id,cartao_id,descricao,valor,status,categoria_id,recurrence_group_id,user_id,data_competencia,created_at,updated_at,categorias(nome)")
     .eq("id", despesaId)
     .eq("cartao_id", cartaoId)
     .eq("user_id", user.id)
