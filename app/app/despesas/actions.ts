@@ -323,11 +323,9 @@ export async function markDespesaAsPaid(formData: FormData) {
   }
 
   const { supabase } = await requireAuthenticatedUser();
-  const { error } = await supabase
-    .from("despesas")
-    .update({ status: "pp", updated_at: new Date().toISOString() })
-    .eq("id", id)
-    .is("deleted_at", null);
+  const { error } = await supabase.rpc("mark_despesa_paid", {
+    p_id: id
+  });
 
   if (error) {
     throw new Error(error.message);

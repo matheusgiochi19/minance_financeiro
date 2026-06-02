@@ -117,19 +117,25 @@ export async function writeLedgerRows(
     return;
   }
 
-  const { error } = await supabase.from("financial_ledger").insert(
-    rows.map((row) => ({
-      data_competencia: row.data_competencia,
-      entidade_id: row.entidade_id,
-      entidade_origem: origin,
-      tipo: origin === "receita" ? "entrada" : "saida",
-      user_id: userId,
-      valor: row.valor
-    }))
+  const tipo = origin === "receita" ? "entrada" : "saida";
+  const errors = await Promise.all(
+    rows.map(async (row) => {
+      const { error } = await supabase.rpc("write_ledger", {
+        p_data_competencia: row.data_competencia,
+        p_entidade_id: row.entidade_id,
+        p_entidade_origem: origin,
+        p_tipo: tipo,
+        p_user_id: userId,
+        p_valor: row.valor
+      });
+
+      return error;
+    })
   );
 
-  if (error) {
-    throw new Error(error.message);
+  const firstError = errors.find((error) => error);
+  if (firstError) {
+    throw new Error(firstError.message);
   }
 }
 
@@ -143,15 +149,20 @@ export async function cancelLedgerRows(
     return;
   }
 
-  const { error } = await supabase
-    .from("financial_ledger")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("user_id", userId)
-    .eq("entidade_origem", origin)
-    .is("deleted_at", null)
-    .in("entidade_id", entityIds);
+  const errors = await Promise.all(
+    entityIds.map(async (entityId) => {
+      const { error } = await supabase.rpc("cancel_ledger", {
+        p_entidade_id: entityId,
+        p_entidade_origem: origin,
+        p_user_id: userId
+      });
 
-  if (error) {
-    throw new Error(error.message);
+      return error;
+    })
+  );
+
+  const firstError = errors.find((error) => error);
+  if (firstError) {
+    throw new Error(firstError.message);
   }
 }
