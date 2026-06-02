@@ -22,7 +22,7 @@ const creditBars = [690, 420, 400, 232, 123, 66, 99];
 const creditLabels = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul"];
 
 export default async function DashboardPage() {
-  const { movimentosRecentes, resumo } = await getDashboardData();
+  const { categorias, bolsos, cartoes, movimentosRecentes, resumo } = await getDashboardData();
   const firstName = "Matheus";
 
   const pieGradient = pieItems
@@ -136,16 +136,43 @@ export default async function DashboardPage() {
               Fonte server-side pronta para a Sprint 1.
             </p>
           </div>
-          <form action={createMovimentoAction} className="hidden xl:block">
-            <input type="hidden" name="tipo" value="despesa" />
-            <input type="hidden" name="descricao" value="Despesa rapida" />
-            <input type="hidden" name="valor" value="1" />
-            <input type="hidden" name="data" value={new Date().toISOString().slice(0, 10)} />
-            <button type="submit" className="rounded-xl bg-[var(--cor_fundo_botao)] px-4 py-3 text-sm font-semibold text-[var(--cor_texto_claro)]">
-              + Nova Despesa
-            </button>
-          </form>
         </div>
+
+        <form action={createMovimentoAction} className="mt-5 grid gap-3 rounded-[18px] bg-[var(--cor_fundo_primaria)]/70 p-4 md:grid-cols-2 xl:grid-cols-[120px_1fr_120px_150px_150px]">
+          <select name="tipo" defaultValue="despesa" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none">
+            <option value="despesa">Despesa</option>
+            <option value="receita">Receita</option>
+          </select>
+          <input name="descricao" required placeholder="Descricao" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none" />
+          <input name="valor" required type="number" min="0.01" step="0.01" placeholder="Valor" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none" />
+          <input name="data" required type="date" defaultValue={new Date().toISOString().slice(0, 10)} className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none" />
+          <label className="grid gap-1 text-xs text-[var(--cor_escura_primaria)]/75">
+            Repetir pelos proximos
+            <input name="repeat_months" type="number" min="1" max="24" defaultValue={1} className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none" />
+          </label>
+          <select name="categoria_id" defaultValue="" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none">
+            <option value="">Categoria</option>
+            {categorias.map((categoria) => (
+              <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
+            ))}
+          </select>
+          <select name="bolso_id" defaultValue="" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none">
+            <option value="">Bolso</option>
+            {bolsos.map((bolso) => (
+              <option key={bolso.id} value={bolso.id}>{bolso.nome}</option>
+            ))}
+          </select>
+          <select name="cartao_id" defaultValue="" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none">
+            <option value="">Cartao opcional</option>
+            {cartoes.map((cartao) => (
+              <option key={cartao.id} value={cartao.id}>{cartao.nome}</option>
+            ))}
+          </select>
+          <input name="observacoes" placeholder="Observacoes" className="h-11 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-white/70 px-3 text-sm outline-none xl:col-span-1" />
+          <button type="submit" className="h-11 rounded-xl bg-[var(--cor_fundo_botao)] px-4 text-sm font-semibold text-[var(--cor_texto_claro)]">
+            Salvar
+          </button>
+        </form>
 
         <div className="mt-5 overflow-hidden rounded-[22px] border border-[var(--cor_escura_primaria)]/8">
           <table className="min-w-full bg-[rgba(255,255,255,0.58)] text-left text-sm">
@@ -162,7 +189,14 @@ export default async function DashboardPage() {
               {movimentosRecentes.slice(0, 6).map((movimento) => (
                 <tr key={`${movimento.tipo}-${movimento.id}`} className="border-t border-[var(--cor_escura_primaria)]/8">
                   <td className="px-4 py-4 uppercase text-[12px] font-semibold text-[var(--cor_escura_primaria)]/72">{movimento.tipo}</td>
-                  <td className="px-4 py-4 font-medium">{movimento.descricao}</td>
+                  <td className="px-4 py-4 font-medium">
+                    <div className="flex flex-col gap-1">
+                      <span>{movimento.descricao}</span>
+                      {movimento.recurrence_group_id ? (
+                        <span className="text-xs font-semibold text-[var(--cor_destaque_secundaria)]">↻ Recorrente</span>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-4 py-4">{movimento.categoria?.nome ?? 'Sem categoria'}</td>
                   <td className="px-4 py-4">{movimento.cartao?.nome ?? movimento.bolso?.nome ?? 'Direto'}</td>
                   <td className={`px-4 py-4 font-semibold ${movimento.tipo === 'receita' ? 'text-[var(--cor_destaque_secundaria)]' : 'text-[var(--cor_despesa_secundaria)]'}`}>

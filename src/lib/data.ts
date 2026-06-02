@@ -24,13 +24,14 @@ type Movimento = {
   id: string;
   tipo: "receita" | "despesa";
   status: "pendente" | "paga" | null;
+  recurrence_group_id: string | null;
   descricao: string;
   valor: number;
   data: string;
   observacoes: string | null;
-  categoria: { nome: string; cor: string } | null;
-  bolso: { nome: string } | null;
-  cartao: { nome: string } | null;
+  categoria: { id: string; nome: string; cor: string } | null;
+  bolso: { id: string; nome: string } | null;
+  cartao: { id: string; nome: string } | null;
 };
 
 export async function getDashboardData() {
@@ -84,7 +85,7 @@ export async function getDashboardData() {
     supabase
       .from("receitas")
       .select(
-        "id, descricao, valor, data_recebimento, observacoes, categorias(nome, cor), bolsos(nome)",
+        "id, recurrence_group_id, descricao, valor, data_recebimento, observacoes, categorias(id, nome, cor), bolsos(id, nome)",
       )
       .eq("user_id", user.id)
       .order("data_recebimento", { ascending: false })
@@ -93,7 +94,7 @@ export async function getDashboardData() {
     supabase
       .from("despesas")
       .select(
-        "id, status, descricao, valor, data_despesa, observacoes, categorias(nome, cor), bolsos(nome), cartoes(nome)",
+        "id, status, recurrence_group_id, descricao, valor, data_despesa, observacoes, categorias(id, nome, cor), bolsos(id, nome), cartoes(id, nome)",
       )
       .eq("user_id", user.id)
       .order("data_despesa", { ascending: false })
@@ -125,6 +126,7 @@ export async function getDashboardData() {
       id: item.id,
       tipo: "receita" as const,
       status: null,
+      recurrence_group_id: item.recurrence_group_id,
       descricao: item.descricao,
       valor: Number(item.valor ?? 0),
       data: item.data_recebimento,
@@ -139,6 +141,7 @@ export async function getDashboardData() {
       id: item.id,
       tipo: "despesa" as const,
       status: item.status ?? "pendente",
+      recurrence_group_id: item.recurrence_group_id,
       descricao: item.descricao,
       valor: Number(item.valor ?? 0),
       data: item.data_despesa,
@@ -205,7 +208,7 @@ export async function getDespesasData() {
       supabase
         .from("despesas")
         .select(
-          "id, status, descricao, valor, data_despesa, observacoes, categorias(nome, cor), bolsos(nome), cartoes(nome)",
+          "id, status, recurrence_group_id, descricao, valor, data_despesa, observacoes, categorias(id, nome, cor), bolsos(id, nome), cartoes(id, nome)",
         )
         .eq("user_id", user.id)
         .order("data_despesa", { ascending: false })
@@ -216,6 +219,7 @@ export async function getDespesasData() {
     id: item.id,
     tipo: "despesa",
     status: item.status ?? "pendente",
+    recurrence_group_id: item.recurrence_group_id,
     descricao: item.descricao,
     valor: Number(item.valor ?? 0),
     data: item.data_despesa,

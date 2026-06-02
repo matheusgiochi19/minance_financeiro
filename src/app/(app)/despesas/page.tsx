@@ -1,6 +1,10 @@
 ﻿import { MoreVertical, Search, SlidersHorizontal } from "lucide-react";
 
-import { createMovimentoAction, deleteMovimentoAction } from "@/app/(app)/actions";
+import {
+  createMovimentoAction,
+  deleteMovimentoAction,
+  updateMovimentoAction,
+} from "@/app/(app)/actions";
 import { getDespesasData } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +43,10 @@ export default async function DespesasPage() {
             <input type="hidden" name="descricao" value="Nova despesa" />
             <input type="hidden" name="valor" value="1" />
             <input type="hidden" name="data" value={today} />
+            <label className="grid gap-1 text-xs text-[var(--cor_escura_primaria)]/75">
+              Repetir pelos proximos
+              <input name="repeat_months" type="number" min="1" max="24" defaultValue={1} className="h-11 w-24 rounded-xl border border-[var(--cor_escura_primaria)]/12 bg-[var(--cor_fundo_primaria)] px-3 text-sm outline-none" />
+            </label>
             <button type="submit" className="rounded-xl bg-[var(--cor_destaque_secundaria)] px-5 py-3 text-sm font-semibold text-[var(--cor_texto_claro)]">
               + Nova Despesa
             </button>
@@ -118,18 +126,78 @@ export default async function DespesasPage() {
                 <tr key={despesa.id} className="border-t border-[var(--cor_escura_primaria)]/8">
                   <td className="px-4 py-4 font-semibold uppercase text-[var(--cor_escura_primaria)]/70">{despesa.status === 'paga' ? 'P' : 'A'}</td>
                   <td className="px-4 py-4">{new Intl.DateTimeFormat('pt-BR').format(new Date(despesa.data))}</td>
-                  <td className="px-4 py-4 font-medium">{despesa.descricao}</td>
+                  <td className="px-4 py-4 font-medium">
+                    <div className="flex flex-col gap-1">
+                      <span>{despesa.descricao}</span>
+                      {despesa.recurrence_group_id ? (
+                        <span className="text-xs font-semibold text-[var(--cor_destaque_secundaria)]">↻ Recorrente</span>
+                      ) : null}
+                    </div>
+                  </td>
                   <td className="px-4 py-4">{despesa.categoria?.nome ?? 'Sem categoria'}</td>
                   <td className="px-4 py-4">{despesa.bolso?.nome ?? despesa.cartao?.nome ?? 'Direto'}</td>
                   <td className="px-4 py-4 font-semibold text-[var(--cor_escura_primaria)]">{formatCurrency(despesa.valor)}</td>
                   <td className="px-4 py-4">
+                    <div className="flex flex-col gap-2">
+                      <details>
+                        <summary className="cursor-pointer rounded-lg bg-[var(--cor_fundo_secundaria)] px-3 py-2 text-xs font-semibold">
+                          Editar
+                        </summary>
+                        <form action={updateMovimentoAction} className="mt-2 grid min-w-[280px] gap-2 rounded-xl bg-[var(--cor_fundo_primaria)] p-3 shadow-lg">
+                          <input type="hidden" name="id" value={despesa.id} />
+                          <input type="hidden" name="tipo" value="despesa" />
+                          <input type="hidden" name="recurrence_group_id" value={despesa.recurrence_group_id ?? ""} />
+                          {despesa.recurrence_group_id ? (
+                            <select name="scope" defaultValue="single" className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs">
+                              <option value="single">Editar somente este</option>
+                              <option value="all">Editar todos recorrentes</option>
+                            </select>
+                          ) : (
+                            <input type="hidden" name="scope" value="single" />
+                          )}
+                          <input name="descricao" defaultValue={despesa.descricao} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs" />
+                          <input name="valor" type="number" step="0.01" min="0.01" defaultValue={despesa.valor} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs" />
+                          <select name="categoria_id" defaultValue={despesa.categoria?.id ?? ""} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs">
+                            <option value="">Sem categoria</option>
+                            {categorias.map((categoria) => (
+                              <option key={categoria.id} value={categoria.id}>{categoria.nome}</option>
+                            ))}
+                          </select>
+                          <select name="bolso_id" defaultValue={despesa.bolso?.id ?? ""} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs">
+                            <option value="">Sem bolso</option>
+                            {bolsos.map((bolso) => (
+                              <option key={bolso.id} value={bolso.id}>{bolso.nome}</option>
+                            ))}
+                          </select>
+                          <select name="cartao_id" defaultValue={despesa.cartao?.id ?? ""} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs">
+                            <option value="">Sem cartao</option>
+                            {cartoes.map((cartaoItem) => (
+                              <option key={cartaoItem.id} value={cartaoItem.id}>{cartaoItem.nome}</option>
+                            ))}
+                          </select>
+                          <input name="observacoes" defaultValue={despesa.observacoes ?? ""} className="h-10 rounded-lg border border-[var(--cor_escura_primaria)]/12 px-3 text-xs" />
+                          <button type="submit" className="rounded-lg bg-[var(--cor_fundo_botao)] px-3 py-2 text-xs font-semibold text-[var(--cor_texto_claro)]">
+                            Salvar
+                          </button>
+                        </form>
+                      </details>
                     <form action={deleteMovimentoAction} className="inline-flex items-center gap-2">
                       <input type="hidden" name="id" value={despesa.id} />
                       <input type="hidden" name="tipo" value="despesa" />
+                      <input type="hidden" name="recurrence_group_id" value={despesa.recurrence_group_id ?? ""} />
+                      {despesa.recurrence_group_id ? (
+                        <select name="scope" defaultValue="single" className="h-9 rounded-lg border border-[var(--cor_escura_primaria)]/12 bg-[var(--cor_fundo_primaria)] px-2 text-xs">
+                          <option value="single">Excluir este</option>
+                          <option value="all">Excluir todos</option>
+                        </select>
+                      ) : (
+                        <input type="hidden" name="scope" value="single" />
+                      )}
                       <button type="submit" className="rounded-lg bg-[var(--cor_fundo_botao)] px-3 py-2 text-xs font-semibold text-[var(--cor_texto_claro)]">
                         Excluir
                       </button>
                     </form>
+                    </div>
                   </td>
                 </tr>
               ))}
