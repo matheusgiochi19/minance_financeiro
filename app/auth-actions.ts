@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getSiteUrl } from "@/lib/env";
+import { getAuthConfirmUrl } from "@/lib/env";
 import { sanitizeText } from "@/lib/security";
 import { withUiAlert } from "@/lib/ui-alert";
 
@@ -37,7 +37,7 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
       data: {
         full_name: fullName
       },
-      emailRedirectTo: `${getSiteUrl()}/auth/confirm`
+      emailRedirectTo: getAuthConfirmUrl()
     }
   });
 

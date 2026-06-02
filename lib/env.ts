@@ -12,6 +12,12 @@ export function getSiteUrl() {
   return "http://localhost:3000";
 }
 
+export function getAuthConfirmUrl() {
+  return process.env.NODE_ENV === "production"
+    ? "https://minancesoftware.vercel.app/auth/confirm"
+    : "http://localhost:3000/auth/confirm";
+}
+
 export function getSupabaseConfig() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
