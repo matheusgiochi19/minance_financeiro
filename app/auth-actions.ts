@@ -37,7 +37,7 @@ export async function signUp(_previousState: AuthState, formData: FormData): Pro
       data: {
         full_name: fullName
       },
-      emailRedirectTo: `${getSiteUrl()}/app/dashboard`
+      emailRedirectTo: `${getSiteUrl()}/auth/confirm`
     }
   });
 

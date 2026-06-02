@@ -1,8 +1,30 @@
 import Link from "next/link";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { ArrowRight, ShieldCheck } from "lucide-react";
 
-export default function LandingPage() {
+type LandingPageProps = {
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
+};
+
+export default async function LandingPage({ searchParams }: LandingPageProps) {
+  const params = searchParams ? await searchParams : {};
+  const callbackKeys = ["code", "error", "error_code", "error_description", "token_hash", "type"];
+  const hasAuthCallback = callbackKeys.some((key) => typeof params[key] !== "undefined");
+
+  if (hasAuthCallback) {
+    const query = new URLSearchParams();
+    callbackKeys.forEach((key) => {
+      const value = params[key];
+      if (typeof value === "string" && value) {
+        query.set(key, value);
+      }
+    });
+
+    const authConfirmHref = `/auth/confirm${query.toString() ? `?${query.toString()}` : ""}`;
+    redirect(authConfirmHref as never);
+  }
+
   return (
     <main className="landing">
       <section className="landing-hero">
