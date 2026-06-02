@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -28,6 +28,8 @@ function createAuthClient() {
   });
 }
 
+type AuthClient = ReturnType<typeof createAuthClient>;
+
 function getErrorState(message?: string | null): ConfirmState {
   return {
     kind: "error",
@@ -36,29 +38,39 @@ function getErrorState(message?: string | null): ConfirmState {
   };
 }
 
+function getSuccessState(): ConfirmState {
+  return {
+    kind: "success",
+    message: "Seu cadastro foi ativado.\n\nAgora você já pode acessar sua conta normalmente.",
+    title: "Conta confirmada com sucesso"
+  };
+}
+
 function getSearchParamValue(searchParams: Record<string, string | string[] | undefined>, key: string) {
   const value = searchParams[key];
   return typeof value === "string" ? value : "";
+}
+
+async function hasConfirmedIdentity(supabase: AuthClient) {
+  const { data: sessionData } = await supabase.auth.getSession();
+  const sessionUser = sessionData.session?.user;
+
+  if (sessionUser?.email_confirmed_at) {
+    return true;
+  }
+
+  const { data: userData } = await supabase.auth.getUser();
+  return Boolean(userData.user?.email_confirmed_at);
 }
 
 export function AuthConfirmFlow({ searchParams }: AuthConfirmFlowProps) {
   const code = getSearchParamValue(searchParams, "code");
   const error = getSearchParamValue(searchParams, "error");
   const errorDescription = getSearchParamValue(searchParams, "error_description");
-  const [state, setState] = useState<ConfirmState>(() => {
-    if (error) {
-      return getErrorState(errorDescription);
-    }
-
-    if (!code) {
-      return getErrorState();
-    }
-
-    return {
-      kind: "loading",
-      message: "Confirmando sua conta...",
-      title: "Validando seu acesso"
-    };
+  const [state, setState] = useState<ConfirmState>({
+    kind: "loading",
+    message: "Confirmando sua conta...",
+    title: "Validando seu acesso"
   });
   const started = useRef(false);
 
@@ -68,39 +80,48 @@ export function AuthConfirmFlow({ searchParams }: AuthConfirmFlowProps) {
     }
     started.current = true;
 
-    if (error) {
-      return;
-    }
-
-    if (!code) {
-      return;
-    }
-
     const supabase = createAuthClient();
     let cancelled = false;
 
     async function confirmAccount() {
       try {
-        const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
-        if (exchangeError) {
-          throw exchangeError;
+        if (await hasConfirmedIdentity(supabase)) {
+          if (!cancelled) {
+            setState(getSuccessState());
+          }
+          return;
         }
 
-        const { data } = await supabase.auth.getUser();
-        if (!data.user) {
-          throw new Error("Nao foi possivel validar sua conta.");
+        let verificationErrorMessage = errorDescription || error || undefined;
+
+        if (code) {
+          const { error: exchangeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (exchangeError) {
+            verificationErrorMessage = exchangeError.message;
+          }
+        }
+
+        if (await hasConfirmedIdentity(supabase)) {
+          if (!cancelled) {
+            setState(getSuccessState());
+          }
+          return;
         }
 
         if (!cancelled) {
-          setState({
-            kind: "success",
-            message: "Seu cadastro foi ativado.\n\nAgora você já pode acessar sua conta normalmente.",
-            title: "Conta confirmada com sucesso"
-          });
+          setState(getErrorState(verificationErrorMessage));
         }
-      } catch {
+      } catch (caughtError) {
+        if (await hasConfirmedIdentity(supabase)) {
+          if (!cancelled) {
+            setState(getSuccessState());
+          }
+          return;
+        }
+
         if (!cancelled) {
-          setState(getErrorState());
+          const message = caughtError instanceof Error ? caughtError.message : errorDescription || error || undefined;
+          setState(getErrorState(message));
         }
       }
     }
