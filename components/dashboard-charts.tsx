@@ -56,9 +56,12 @@ function useVisible() {
 
   useEffect(() => {
     if (!ref.current || visible) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) setVisible(true);
-    }, { rootMargin: "160px" });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) setVisible(true);
+      },
+      { rootMargin: "160px" }
+    );
     observer.observe(ref.current);
     return () => observer.disconnect();
   }, [visible]);
@@ -68,7 +71,7 @@ function useVisible() {
 
 function PieChart({ slices }: { slices: CategorySlice[] }) {
   const total = slices.reduce((sum, slice) => sum + slice.valor, 0);
-  if (!total) return <div className="empty-chart">Sem despesas no mes atual</div>;
+  if (!total) return <div className="empty-chart">Sem despesas no mês atual</div>;
 
   const arcs = slices.reduce<Array<{ color: string; name: string; path: string; value: number }>>((acc, slice, index) => {
     const startAngle = acc.reduce((angle, item) => angle + (item.value / total) * 360, 0);
@@ -83,7 +86,12 @@ function PieChart({ slices }: { slices: CategorySlice[] }) {
         {arcs.map((arc) => <path d={arc.path} fill={arc.color} key={arc.name} />)}
       </svg>
       <div className="chart-legend-grid">
-        {slices.map((slice, index) => <span key={slice.nome}><i style={{ background: pieColors[index % pieColors.length] }} />{slice.nome} {formatCurrency(slice.valor)}</span>)}
+        {slices.map((slice, index) => (
+          <span key={slice.nome}>
+            <i style={{ background: pieColors[index % pieColors.length] }} />
+            {slice.nome} {formatCurrency(slice.valor)}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -92,21 +100,31 @@ function PieChart({ slices }: { slices: CategorySlice[] }) {
 function LineChart({ labels, tone = "invoice", values }: { labels: string[]; tone?: "balance" | "invoice"; values: number[] }) {
   const max = Math.max(...values.map((value) => Math.abs(value)), 1);
   const color = tone === "balance" ? "#4ca6a8" : "#cf66ff";
-  const points = values.map((value, index) => {
-    const x = 20 + index * (260 / Math.max(values.length - 1, 1));
-    const y = 150 - (Math.max(value, 0) / max) * 120;
-    return `${x},${y}`;
-  }).join(" ");
+  const points = values
+    .map((value, index) => {
+      const x = 20 + index * (260 / Math.max(values.length - 1, 1));
+      const y = 150 - (Math.max(value, 0) / max) * 120;
+      return `${x},${y}`;
+    })
+    .join(" ");
 
   return (
-    <svg className="line-chart" viewBox="0 0 320 180" role="img" aria-label={tone === "balance" ? "Evolucao de saldo" : "Faturas dos cartoes"}>
+    <svg className="line-chart" viewBox="0 0 320 180" role="img" aria-label={tone === "balance" ? "Evolução de saldo" : "Faturas dos cartões"}>
       <polyline fill="none" points={points} stroke={color} strokeLinecap="round" strokeWidth="5" />
       {values.map((value, index) => {
         const x = 20 + index * (260 / Math.max(values.length - 1, 1));
         const y = 150 - (Math.max(value, 0) / max) * 120;
-        return <circle cx={x} cy={y} fill={color} key={`${labels[index]}-${value}`} r="5"><title>{formatCurrency(value)}</title></circle>;
+        return (
+          <circle cx={x} cy={y} fill={color} key={`${labels[index]}-${value}`} r="5">
+            <title>{formatCurrency(value)}</title>
+          </circle>
+        );
       })}
-      {labels.map((label, index) => <text className="line-chart-label" fontSize="10" key={label} textAnchor="middle" x={20 + index * (260 / Math.max(labels.length - 1, 1))} y="172">{label}</text>)}
+      {labels.map((label, index) => (
+        <text className="line-chart-label" fontSize="10" key={label} textAnchor="middle" x={20 + index * (260 / Math.max(labels.length - 1, 1))} y="172">
+          {label}
+        </text>
+      ))}
     </svg>
   );
 }
@@ -117,10 +135,15 @@ function DashboardChartsComponent({ categories, insights, months, series }: Dash
 
   return (
     <div className="dashboard-grid real-dashboard-grid" ref={ref}>
-      {!visible ? <div className="chart-lazy-placeholder">Carregando graficos...</div> : (
+      {!visible ? (
+        <div className="chart-lazy-placeholder">Carregando gráficos...</div>
+      ) : (
         <>
-          <section className="chart-panel bar-panel" aria-label="Receita vs despesa">
-            <h2>Receita vs Despesa</h2>
+          <section className="chart-panel bar-panel" aria-label="Receita versus despesa">
+            <div className="chart-panel-header">
+              <p>Desempenho mensal</p>
+              <h2>Receita vs. Despesa</h2>
+            </div>
             <div className="bar-chart real-bar-chart">
               {months.map((month, index) => (
                 <div className="bar-month" key={month.label}>
@@ -132,29 +155,95 @@ function DashboardChartsComponent({ categories, insights, months, series }: Dash
                 </div>
               ))}
             </div>
-            <div className="legend"><span><i className="income-dot" />Receitas</span><span><i className="expense-dot" />Despesas</span></div>
+            <div className="legend">
+              <span><i className="income-dot" />Receitas</span>
+              <span><i className="expense-dot" />Despesas</span>
+            </div>
           </section>
-          <section className="chart-panel pie-panel" aria-label="Despesas por categorias"><h2>Despesas por Categoria</h2><PieChart slices={categories} /></section>
-          <section className="chart-panel invoice-panel" aria-label="Faturas cartoes"><h2>Faturas Cartoes</h2><LineChart labels={months.map((month) => month.label)} values={series.faturas} /></section>
-          <section className="chart-panel invoice-panel" aria-label="Evolucao de saldo"><h2>Evolucao de Saldo</h2><LineChart labels={insights.saldoAcumulado.map((item) => item.label)} tone="balance" values={insights.saldoAcumulado.map((item) => item.saldo)} /></section>
-          <section className="chart-panel intelligence-panel" aria-label="Saude financeira">
-            <h2>Saude Financeira</h2>
+
+          <section className="chart-panel pie-panel" aria-label="Despesas por categorias">
+            <div className="chart-panel-header">
+              <p>Concentração de gastos</p>
+              <h2>Despesas por categoria</h2>
+            </div>
+            <PieChart slices={categories} />
+          </section>
+
+          <section className="chart-panel invoice-panel" aria-label="Faturas dos cartões">
+            <div className="chart-panel-header">
+              <p>Compromissos futuros</p>
+              <h2>Faturas dos cartões</h2>
+            </div>
+            <LineChart labels={months.map((month) => month.label)} values={series.faturas} />
+          </section>
+
+          <section className="chart-panel invoice-panel" aria-label="Evolução de saldo">
+            <div className="chart-panel-header">
+              <p>Saldo acumulado</p>
+              <h2>Evolução de saldo</h2>
+            </div>
+            <LineChart labels={insights.saldoAcumulado.map((item) => item.label)} tone="balance" values={insights.saldoAcumulado.map((item) => item.saldo)} />
+          </section>
+
+          <section className="chart-panel intelligence-panel" aria-label="Saúde financeira">
+            <div className="chart-panel-header">
+              <p>Resumo rápido</p>
+              <h2>Saúde Financeira</h2>
+            </div>
             <div className="insight-grid">
-              <article><span>Renda comprometida</span><strong>{insights.health.comprometida}%</strong></article>
-              <article><span>Disponivel</span><strong>{insights.health.livre}%</strong></article>
-              <article><span>Cartoes</span><strong>{insights.health.cartoes}%</strong></article>
-              <article><span>Proximos 30 dias</span><strong>{formatCurrency(insights.projection.proximos30)}</strong></article>
+              <article>
+                <span>Renda comprometida</span>
+                <strong>{insights.health.comprometida}%</strong>
+              </article>
+              <article>
+                <span>Disponível</span>
+                <strong>{insights.health.livre}%</strong>
+              </article>
+              <article>
+                <span>Cartões</span>
+                <strong>{insights.health.cartoes}%</strong>
+              </article>
+              <article>
+                <span>Próximos 30 dias</span>
+                <strong>{formatCurrency(insights.projection.proximos30)}</strong>
+              </article>
             </div>
           </section>
-          <section className="chart-panel intelligence-panel" aria-label="Tendencia de gastos">
-            <h2>Tendencia de Gastos</h2>
+
+          <section className="chart-panel intelligence-panel" aria-label="Tendência de gastos">
+            <div className="chart-panel-header">
+              <p>Mudanças recentes</p>
+              <h2>Tendência de gastos</h2>
+            </div>
             <div className="trend-list">
-              {insights.tendencias.length ? insights.tendencias.map((item) => <span key={item.nome}><b>{item.variacao > 0 ? "Alta" : "Queda"}</b>{item.nome}<strong>{formatCurrency(Math.abs(item.variacao))}</strong></span>) : <p className="empty-copy">Sem variacao relevante.</p>}
+              {insights.tendencias.length ? (
+                insights.tendencias.map((item) => (
+                  <span key={item.nome}>
+                    <b>{item.variacao > 0 ? "Alta" : "Queda"}</b>
+                    {item.nome}
+                    <strong>{formatCurrency(Math.abs(item.variacao))}</strong>
+                  </span>
+                ))
+              ) : (
+                <p className="empty-copy">Sem variação relevante.</p>
+              )}
             </div>
           </section>
+
           <section className="chart-panel intelligence-panel" aria-label="Maior categoria de despesa">
-            <h2>Maior Categoria</h2>
-            {insights.dominantCategory ? <div className="dominant-card"><strong>{insights.dominantCategory.nome}</strong><span>{insights.dominantCategory.percentual}% das despesas do mes</span><small>{formatCurrency(insights.dominantCategory.valor)}</small></div> : <p className="empty-copy">Sem despesas no mes.</p>}
+            <div className="chart-panel-header">
+              <p>Destaque do mês</p>
+              <h2>Maior categoria</h2>
+            </div>
+            {insights.dominantCategory ? (
+              <div className="dominant-card">
+                <strong>{insights.dominantCategory.nome}</strong>
+                <span>{insights.dominantCategory.percentual}% das despesas do mês</span>
+                <small>{formatCurrency(insights.dominantCategory.valor)}</small>
+              </div>
+            ) : (
+              <p className="empty-copy">Sem despesas no mês.</p>
+            )}
           </section>
         </>
       )}
