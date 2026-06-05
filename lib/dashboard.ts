@@ -66,6 +66,7 @@ export async function getDashboardData(mes?: string) {
   const receitasMes = sumByMonth(receitas.data);
   const despesasMes = sumByMonth(despesas.data);
   const faturasMes = sumByMonth(faturas.data);
+  const despesasTotaisMes = despesasMes.map((value, index) => value + (faturasMes[index] || 0));
   const [saldoReal, receitasReal, despesasReal, faturasReal] = await Promise.all([
     calcularSaldo(user.id, current),
     calcularTotalReceitas(user.id, current),
@@ -98,17 +99,18 @@ export async function getDashboardData(mes?: string) {
     .filter((item) => item.variacao !== 0)
     .sort((a, b) => Math.abs(b.variacao) - Math.abs(a.variacao))
     .slice(0, 5);
-  const rendaComprometida = receitasReal > 0 ? Math.min(100, Math.round(((despesasReal + faturasReal) / receitasReal) * 100)) : 0;
+  const despesasAnaliticas = despesasReal + faturasReal;
+  const rendaComprometida = receitasReal > 0 ? Math.min(100, Math.round((despesasAnaliticas / receitasReal) * 100)) : 0;
   const gastoCartoes = receitasReal > 0 ? Math.min(100, Math.round((faturasReal / receitasReal) * 100)) : 0;
   const saldoAcumulado = receitasMes.reduce<Array<{ label: string; saldo: number }>>((acc, receita, index) => {
     const previousSaldo = acc[index - 1]?.saldo || 0;
-    acc.push({ label: months[index].label, saldo: previousSaldo + receita - despesasMes[index] - faturasMes[index] });
+    acc.push({ label: months[index].label, saldo: previousSaldo + receita - despesasTotaisMes[index] });
     return acc;
   }, []);
 
   return {
     cards: {
-      despesas: despesasReal,
+      despesas: despesasAnaliticas,
       faturas: faturasReal,
       receitas: receitasReal,
       saldo: saldoReal
@@ -128,14 +130,15 @@ export async function getDashboardData(mes?: string) {
         livre: Math.max(0, 100 - rendaComprometida)
       },
       projection: {
-        proximos30: Math.max(0, despesasReal + faturasReal)
+        proximos30: Math.max(0, despesasAnaliticas)
       },
       saldoAcumulado,
       tendencias
     },
     months,
     series: {
-      despesas: despesasMes,
+      despesas: despesasTotaisMes,
+      despesasComuns: despesasMes,
       faturas: faturasMes,
       receitas: receitasMes
     }

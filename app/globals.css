@@ -1504,6 +1504,11 @@ button {
   align-items: start;
 }
 
+.chart-panel {
+  display: grid;
+  gap: 16px;
+}
+
 .bar-panel h2,
 .pie-panel h2,
 .invoice-panel h2 {
@@ -1512,18 +1517,17 @@ button {
   margin: 0 0 18px;
 }
 
-.real-bar-chart {
-  margin-left: 0;
-}
-
 .real-pie-wrap {
   display: grid;
   gap: 18px;
+  grid-template-columns: minmax(280px, 1fr) minmax(220px, 0.95fr);
+  align-items: center;
 }
 
 .real-pie {
   filter: drop-shadow(0 14px 22px rgba(29, 36, 51, 0.12));
-  max-width: 260px;
+  overflow: visible;
+  width: 100%;
 }
 
 .chart-legend-grid {
@@ -1534,9 +1538,11 @@ button {
 .chart-legend-grid span {
   align-items: center;
   color: rgba(34, 40, 57, 0.68);
-  display: flex;
+  display: grid;
   font-size: 12px;
   gap: 8px;
+  grid-template-columns: 12px minmax(0, 1fr) auto auto;
+  min-width: 0;
 }
 
 .chart-legend-grid i {
@@ -1544,6 +1550,32 @@ button {
   display: inline-block;
   height: 12px;
   width: 12px;
+}
+
+.chart-legend-grid b,
+.chart-legend-grid small,
+.chart-legend-grid strong {
+  min-width: 0;
+}
+
+.chart-legend-grid b {
+  font-size: 12px;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-legend-grid small {
+  color: #4a5364;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.chart-legend-grid strong {
+  font-size: 12px;
+  font-weight: 900;
+  text-align: right;
 }
 
 .empty-chart {
@@ -1567,18 +1599,32 @@ button {
   padding: 20px;
 }
 
-.line-chart {
+.chart-svg {
   background: rgba(255, 255, 255, 0.34);
-  border-radius: 8px;
+  border-radius: 12px;
+  display: block;
   width: 100%;
+  overflow: visible;
 }
 
-.line-chart-label {
-  fill: rgba(34, 40, 57, 0.62);
+.chart-svg text {
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.dark .line-chart-label {
-  fill: rgba(244, 239, 231, 0.72);
+.dark .chart-svg {
+  background: rgba(244, 239, 231, 0.06);
+}
+
+.dark .chart-svg text {
+  fill: rgba(244, 239, 231, 0.76);
+}
+
+.dark .chart-legend-grid span {
+  color: rgba(244, 239, 231, 0.76);
+}
+
+.dark .chart-legend-grid small {
+  color: rgba(244, 239, 231, 0.6);
 }
 
 .insight-grid {
@@ -1783,6 +1829,10 @@ button {
 @media (max-width: 900px) {
   .landing-hero,
   .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .real-pie-wrap {
     grid-template-columns: 1fr;
   }
 
