@@ -12,21 +12,22 @@ export const CHART_COLORS = {
 
 export const CHART_LAYOUT = {
   bar: {
-    height: 300,
-    paddingBottom: 42,
-    paddingLeft: 68,
+    height: 360,
+    paddingBottom: 50,
+    paddingLeft: 72,
     paddingRight: 20,
-    paddingTop: 24
+    paddingTop: 28
   },
   line: {
-    height: 258,
-    paddingBottom: 40,
-    paddingLeft: 56,
+    height: 320,
+    paddingBottom: 50,
+    paddingLeft: 62,
     paddingRight: 20,
-    paddingTop: 20
+    paddingTop: 26
   },
   pie: {
-    height: 300,
+    height: 340,
+    width: 380,
     paddingBottom: 12,
     paddingLeft: 12,
     paddingRight: 12,
@@ -35,7 +36,7 @@ export const CHART_LAYOUT = {
 } as const;
 
 export const CHART_TEXT = {
-  axis: "rgba(34, 40, 57, 0.66)",
-  label: "rgba(34, 40, 57, 0.82)",
-  muted: "rgba(34, 40, 57, 0.54)"
+  axis: "rgba(34, 40, 57, 0.72)",
+  label: "rgba(34, 40, 57, 0.86)",
+  muted: "rgba(34, 40, 57, 0.58)"
 } as const;

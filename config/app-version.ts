@@ -1,1 +1,1 @@
-export const APP_VERSION = "Sprint 1.20";
+export const APP_VERSION = "v1.20.1";

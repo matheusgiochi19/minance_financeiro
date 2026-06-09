@@ -128,7 +128,7 @@ function MonetaryAxis({
         const y = top + innerHeight - (tick / maxValue) * innerHeight;
         return (
           <g key={tick}>
-            <text fill={CHART_TEXT.axis} fontSize="11" textAnchor="end" x={left - 10} y={y + 4}>
+            <text fill={CHART_TEXT.axis} fontSize="12" textAnchor="end" x={left - 12} y={y + 4}>
               {tick === 0 ? "0" : formatCurrencyBRL(tick, { compact: true }).replace("R$ ", "")}
             </text>
           </g>
@@ -151,7 +151,7 @@ function ValueBadge({
   return (
     <g transform={`translate(${x - width / 2}, ${y})`}>
       <rect fill={CHART_COLORS.labelBg} height="20" rx="8" ry="8" width={width} />
-      <text fill={CHART_COLORS.labelText} fontSize="10" fontWeight="700" textAnchor="middle" x={width / 2} y="13">
+      <text fill={CHART_COLORS.labelText} fontSize="11" fontWeight="700" textAnchor="middle" x={width / 2} y="14">
         {label}
       </text>
     </g>
@@ -213,7 +213,7 @@ function BarChart({ months, receitaValues, despesaValues }: { despesaValues: num
               </rect>
               <ValueBadge label={formatCurrencyBRL(despesaValues[index] || 0, { compact: true })} x={despesaX + barWidth / 2} y={Math.max(despesaY - 26, 4)} />
             </g>
-            <text fill={CHART_TEXT.axis} fontSize="11" textAnchor="middle" x={center} y={height - 12}>
+            <text fill={CHART_TEXT.axis} fontSize="12" textAnchor="middle" x={center} y={height - 14}>
               {month.label}
             </text>
           </g>
@@ -272,7 +272,7 @@ function LineChart({
       {labels.map((label, index) => {
         const points = buildSeriesPoints(series[0].values, CHART_LAYOUT.line);
         return (
-          <text key={label} fill={CHART_TEXT.axis} fontSize="11" textAnchor="middle" x={points[index]?.x || 0} y={height - 12}>
+            <text key={label} fill={CHART_TEXT.axis} fontSize="12" textAnchor="middle" x={points[index]?.x || 0} y={height - 14}>
             {label}
           </text>
         );
@@ -289,10 +289,12 @@ function PieChart({ slices }: { slices: CategorySlice[] }) {
     return <div className="empty-chart">Sem despesas no mes atual</div>;
   }
 
-  const cx = 160;
-  const cy = 150;
-  const radius = 102;
-  const labelRadius = 128;
+  const width = CHART_LAYOUT.pie.width;
+  const height = CHART_LAYOUT.pie.height;
+  const cx = width / 2;
+  const cy = height / 2;
+  const radius = 122;
+  const labelRadius = 156;
   const arcs = prepared.reduce<Array<{
     anchor: { x: number; y: number };
     endAngle: number;
@@ -326,8 +328,8 @@ function PieChart({ slices }: { slices: CategorySlice[] }) {
 
   return (
     <div className="real-pie-wrap">
-      <svg className="real-pie" viewBox="0 0 320 300" role="img" aria-label="Despesas por categoria">
-        <circle cx={cx} cy={cy} fill="rgba(255,255,255,0.4)" r={radius + 10} />
+      <svg className="real-pie" viewBox={`0 0 ${width} ${height}`} role="img" aria-label="Despesas por categoria">
+        <circle cx={cx} cy={cy} fill="rgba(255,255,255,0.4)" r={radius + 12} />
         {arcs.map(({ anchor, leaderStart, path, slice, textAnchor }) => {
           return (
             <g key={slice.name}>
@@ -343,20 +345,20 @@ function PieChart({ slices }: { slices: CategorySlice[] }) {
                 strokeWidth="1.4"
               />
               <circle cx={anchor.x} cy={anchor.y} fill={slice.color} r="2.8" />
-              <text fill={CHART_TEXT.label} fontSize="11" fontWeight="700" textAnchor={textAnchor} x={anchor.x} y={anchor.y - 4}>
+              <text fill={CHART_TEXT.label} fontSize="12" fontWeight="700" textAnchor={textAnchor} x={anchor.x} y={anchor.y - 4}>
                 {slice.displayName}
               </text>
-              <text fill={CHART_TEXT.axis} fontSize="10" textAnchor={textAnchor} x={anchor.x} y={anchor.y + 10}>
+              <text fill={CHART_TEXT.axis} fontSize="11" textAnchor={textAnchor} x={anchor.x} y={anchor.y + 11}>
                 {`${slice.percent}% - ${formatCurrencyBRL(slice.value, { compact: true })}`}
               </text>
             </g>
           );
         })}
-        <circle cx={cx} cy={cy} fill="rgba(255,255,255,0.84)" r="44" />
-        <text fill={CHART_TEXT.label} fontSize="13" fontWeight="700" textAnchor="middle" x={cx} y={cy - 2}>
+        <circle cx={cx} cy={cy} fill="rgba(255,255,255,0.84)" r="50" />
+        <text fill={CHART_TEXT.label} fontSize="14" fontWeight="700" textAnchor="middle" x={cx} y={cy - 3}>
           Total
         </text>
-        <text fill={CHART_TEXT.axis} fontSize="14" fontWeight="800" textAnchor="middle" x={cx} y={cy + 18}>
+        <text fill={CHART_TEXT.axis} fontSize="15" fontWeight="800" textAnchor="middle" x={cx} y={cy + 20}>
           {formatCurrencyBRL(total, { compact: true })}
         </text>
       </svg>
