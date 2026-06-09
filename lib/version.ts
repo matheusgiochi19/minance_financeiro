@@ -1,1 +1,1 @@
-export const APP_VERSION = "v1.19.1";
+export { APP_VERSION } from "@/config/app-version";

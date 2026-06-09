@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { signOut } from "@/app/auth-actions";
 import type { AppRole, ThemePreference } from "@/lib/profiles";
-import { APP_VERSION } from "@/lib/version";
+import { APP_VERSION } from "@/config/app-version";
 
 const baseNavItems = [
   { label: "Dashboard", icon: LayoutDashboard, href: "/app/dashboard" },

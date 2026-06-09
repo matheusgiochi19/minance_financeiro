@@ -1,7 +1,7 @@
 import { formatCurrency, type ExpenseStatus } from "@/lib/expenses";
 import { createClient } from "@/lib/supabase/server";
 import { requireAuthenticatedUser } from "@/lib/user-data";
-import { calcularFaturaCartao, calcularSaldo, calcularTotalDespesas, calcularTotalReceitas, getPeriodoMes } from "@/services/finance.service";
+import { calcularFaturaCartao, calcularSaldo, calcularTotalDespesas, calcularTotalReceitas, formatDateYmd, getPeriodoMes } from "@/services/finance.service";
 
 export type MonthPoint = {
   end: string;
@@ -28,13 +28,13 @@ function monthLabel(date: Date) {
 export function getDashboardMonths(): MonthPoint[] {
   const now = new Date();
   return Array.from({ length: 6 }, (_, index) => {
-    const offset = index - 1;
+    const offset = index;
     const startDate = new Date(now.getFullYear(), now.getMonth() + offset, 1);
     const endDate = new Date(now.getFullYear(), now.getMonth() + offset + 1, 1);
     return {
-      end: endDate.toISOString().slice(0, 10),
+      end: formatDateYmd(endDate),
       label: monthLabel(startDate),
-      start: startDate.toISOString().slice(0, 10)
+      start: formatDateYmd(startDate)
     };
   });
 }

@@ -3,7 +3,7 @@ import Image from "next/image";
 import { AuthForm } from "@/components/auth-form";
 import { UrlAlertBanner } from "@/components/url-alert-banner";
 import { signIn } from "@/app/auth-actions";
-import { APP_VERSION } from "@/lib/version";
+import { APP_VERSION } from "@/config/app-version";
 
 type LoginPageProps = {
   searchParams: Promise<{
